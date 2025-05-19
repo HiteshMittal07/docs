@@ -1,0 +1,135 @@
+---
+title: "Pay Gas with ERC-20 Tokens"
+description: "Enable users to pay gas fees using ERC-20 tokens with Smart Wallets and Kernel Wallets"
+---
+
+Enabling users to pay gas fees with ERC-20 tokens enhances the user experience by removing the need to hold native tokens like ETH. This is especially useful for onboarding users who primarily hold stable coins or other ERC-20 assets.
+
+## Getting Started
+
+<Steps>
+  <Step title="Importing Dependencies">
+    ```typescript
+    import { createGelatoSmartWalletClient, erc20 } from "@gelatonetwork/smartwallet";
+    import { createWalletClient, http } from "viem";
+    import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+    ```
+  </Step>
+  <Step title="Creating a Wallet Client">
+    Quickly get started by creating a wallet client using createWalletClient from viem with local account for your specified network.
+
+    ```typescript
+    const privateKey = (process.env.PRIVATE_KEY ?? generatePrivateKey()) as Hex;
+    const account = privateKeyToAccount(privateKey);
+
+    const client = createWalletClient({
+      account,
+      chain: baseSepolia,
+      transport: http()
+    });
+    ```
+
+  </Step>
+  <Step title="Creating a Smart Wallet Client">
+    <Tabs>
+      <Tab title="Smart Wallet (EIP-7702)">
+        A Smart Wallet Client serves as an alternative to the standard viem walletClient, but is purpose-built for managing EOA's as smart wallets instead of traditional EOA (Externally Owned Accounts).
+
+        To initialize a Smart Wallet Client, use the `createGelatoSmartWalletClient` method:
+
+        ```typescript
+        const smartWalletClient = createGelatoSmartWalletClient(client);
+        ```
+      </Tab>
+      <Tab title="Kernel Wallet (ERC-4337)">
+        A Kernel Wallet Client serves as an alternative to the standard viem walletClient, but is purpose-built for managing smart contract wallets instead of traditional EOA (Externally Owned Accounts).
+
+        Use `wallet: 'kernel'` when creating the Smart Wallet client to ensure ERC-4337 compatibility:
+
+        ```typescript
+        const kernelWalletClient = createGelatoSmartWalletClient(client, {
+          wallet: "kernel"
+        });
+        ```
+      </Tab>
+    </Tabs>
+
+  </Step>
+  <Step title="Sending Transactions">
+    To send transactions with ERC-20 gas payments, select ERC20 as the payment method and use one of the supported tokens for gas fees. You can check the list of supported ERC-20 tokens [here](https://docs.gelato.network/developer-services/relay/quick-start/supported-networks).
+
+    <Tabs>
+      <Tab title="Smart Wallet (EIP-7702)">
+        ```typescript
+        const tokenAddress = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // USDC (Base Sepolia)
+        const results = await smartWalletClient.execute({
+          payment: erc20(tokenAddress),
+          calls: [
+            {
+              to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+              data: "0xd09de08a",
+              value: 0n
+            }
+          ]
+        });
+
+        console.log("userOp hash:", results?.id);
+        const txHash = await results?.wait();
+        console.log("transaction hash", txHash);
+        ```
+      </Tab>
+      <Tab title="Kernel Wallet (ERC-4337)">
+        ```typescript
+        const tokenAddress = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // USDC (Base Sepolia)
+        const results = await kernelWalletClient.execute({
+          payment: erc20(tokenAddress),
+          calls: [
+            {
+              to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+              data: "0xd09de08a",
+              value: 0n
+            }
+          ]
+        });
+
+        console.log("userOp hash:", results?.id);
+        const txHash = await results?.wait();
+        console.log("transaction hash", txHash);
+        ```
+      </Tab>
+    </Tabs>
+
+  </Step>
+  <Step title="Batch Multiple Transactions">
+    You can batch multiple transactions to be sent on-chain at once by adding them to the calls array:
+
+    ```typescript
+    const results = await smartWalletClient.execute({ // use kernelWalletClient for ERC4337 transactions
+      payment: erc20(tokenAddress),
+      calls: [
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        },
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        },
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        }
+      ]
+    });
+    ```
+
+  </Step>
+</Steps>
+
+## Additional Resources
+
+- View example code implementing ERC-20 gas payments using the Gelato Smart Wallet SDK [here](https://github.com/gelatodigital/gelato-sdk-examples/tree/main/examples/smart-wallet).
+- Check out the full implementation of ERC-20 gas payments using [Smart Wallets](https://github.com/gelatodigital/gelato-sdk-examples/tree/main/examples/smart-wallet) and [Kernel Wallets (ERC-4337)](https://github.com/gelatodigital/gelato-sdk-examples/tree/main/examples/kernel-wallet).

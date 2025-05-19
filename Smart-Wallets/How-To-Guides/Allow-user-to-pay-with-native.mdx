@@ -1,0 +1,133 @@
+---
+title: "Pay Gas with Native Tokens"
+description: "Enable users to pay gas fees using native tokens with Smart Wallets and Kernel Wallets"
+---
+
+Enabling users to pay gas fees with native tokens (like ETH) provides a straightforward way to handle transaction costs while maintaining full control over gas payments.
+
+## Getting Started
+
+<Steps>
+  <Step title="Importing Dependencies">
+    ```typescript
+    import { createGelatoSmartWalletClient, native } from "@gelatonetwork/smartwallet";
+    import { createWalletClient, http } from "viem";
+    import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+    ```
+  </Step>
+  <Step title="Creating a Wallet Client">
+    Quickly get started by creating a wallet client using createWalletClient from viem with local account for your specified network.
+
+    ```typescript
+    const privateKey = (process.env.PRIVATE_KEY ?? generatePrivateKey()) as Hex;
+    const account = privateKeyToAccount(privateKey);
+
+    const client = createWalletClient({
+      account,
+      chain: baseSepolia,
+      transport: http()
+    });
+    ```
+
+  </Step>
+  <Step title="Creating a Smart Wallet Client">
+    <Tabs>
+      <Tab title="Smart Wallet (EIP-7702)">
+        A Smart Wallet Client serves as an alternative to the standard viem walletClient, but is purpose-built for managing EOA's as smart wallets instead of traditional EOA (Externally Owned Accounts).
+
+        To initialize a Smart Wallet Client, use the `createGelatoSmartWalletClient` method:
+
+        ```typescript
+        const smartWalletClient = createGelatoSmartWalletClient(client);
+        ```
+      </Tab>
+      <Tab title="Kernel Wallet (ERC-4337)">
+        A Kernel Wallet Client serves as an alternative to the standard viem walletClient, but is purpose-built for managing smart contract wallets instead of traditional EOA (Externally Owned Accounts).
+
+        Use `wallet: 'kernel'` when creating the Smart Wallet client to ensure ERC-4337 compatibility:
+
+        ```typescript
+        const kernelWalletClient = createGelatoSmartWalletClient(client, {
+          wallet: "kernel"
+        });
+        ```
+      </Tab>
+    </Tabs>
+
+  </Step>
+  <Step title="Sending Transactions">
+    To send transactions with native gas payments, select Native as the payment method and ensure your account has enough native currency to cover the gas fees.
+
+    <Tabs>
+      <Tab title="Smart Wallet (EIP-7702)">
+        ```typescript
+        const results = await smartWalletClient.execute({
+          payment: native(),
+          calls: [
+            {
+              to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+              data: "0xd09de08a",
+              value: 0n
+            }
+          ]
+        });
+
+        console.log("userOp hash:", results?.id);
+        const txHash = await results?.wait();
+        console.log("transaction hash", txHash);
+        ```
+      </Tab>
+      <Tab title="Kernel Wallet (ERC-4337)">
+        ```typescript
+        const results = await kernelWalletClient.execute({
+          payment: native(),
+          calls: [
+            {
+              to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+              data: "0xd09de08a",
+              value: 0n
+            }
+          ]
+        });
+
+        console.log("userOp hash:", results?.id);
+        const txHash = await results?.wait();
+        console.log("transaction hash", txHash);
+        ```
+      </Tab>
+    </Tabs>
+
+  </Step>
+  <Step title="Batch Multiple Transactions">
+    You can batch multiple transactions to be sent on-chain at once by adding them to the calls array:
+
+    ```typescript
+    const results = await smartWalletClient.execute({
+      payment: native(),
+      calls: [
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        },
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        },
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        }
+      ]
+    });
+    ```
+
+  </Step>
+</Steps>
+
+## Additional Resources
+
+- View example code implementing native gas payments using the Gelato Smart Wallet SDK [here](https://github.com/gelatodigital/gelato-sdk-examples/tree/main/examples/smart-wallet).
+- Check out the full implementation of native gas payments using [Smart Wallets](https://github.com/gelatodigital/gelato-sdk-examples/tree/main/examples/smart-wallet) and [Kernel Wallets (ERC-4337)](https://github.com/gelatodigital/gelato-sdk-examples/tree/main/examples/kernel-wallet).

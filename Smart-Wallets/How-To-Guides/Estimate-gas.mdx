@@ -1,0 +1,86 @@
+---
+title: "Estimate Gas Costs"
+description: "Learn how to estimate gas costs for transactions using the Smart Wallet SDK"
+---
+
+One of the key features of the Smart Wallet SDK is its ability to estimate gas costs before sending a transaction on-chain—across different gas payment methods.
+
+Gas estimation is crucial for ensuring transactions are processed smoothly and efficiently. It helps developers and users avoid failed transactions due to underpayment and provides better transparency into the expected cost of execution, improving both reliability and user experience.
+
+## Getting Started
+
+<Steps>
+  <Step title="Setup Smart Wallet Client">
+    Quickly set up the Smart Wallet client as outlined in the How-To Guides.
+
+    ```typescript
+    import { createGelatoSmartWalletClient, sponsored } from "@gelatonetwork/smartwallet";
+    import { createWalletClient, http } from "viem";
+    import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+
+    const privateKey = (process.env.PRIVATE_KEY ?? generatePrivateKey()) as Hex;
+    const account = privateKeyToAccount(privateKey);
+
+    const client = createWalletClient({
+      account,
+      chain: baseSepolia,
+      transport: http()
+    });
+
+    const smartWalletClient = createGelatoSmartWalletClient(client);
+    ```
+
+  </Step>
+  <Step title="Estimate Gas">
+    Use `estimate` instead of `execute` when estimating gas for transactions with different gas payment methods.
+
+    Note: When estimating gas for ERC-20 tokens, the results will be based on the token's decimals. Ensure you format the results accordingly. Learn how to use different gas payment methods [here](https://docs.gelato.network/developer-services/relay/quick-start/gas-payment-methods).
+
+    ```typescript
+    const results = await smartWalletClient.estimate({
+      payment: sponsored(),
+      calls: [
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        }
+      ]
+    });
+
+    console.log(`Estimated fee: ${formatEther(results.estimatedFee)} ETH`);
+    console.log(`Estimated gas: ${results.estimatedGas} GAS`);
+    ```
+
+  </Step>
+  <Step title="Estimate Gas for Multiple Transactions">
+    You can also estimate gas for multiple transactions by adding them to the calls array:
+
+    ```typescript
+    const results = await smartWalletClient.estimate({
+      payment: sponsored(),
+      calls: [
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        },
+        {
+          to: "0xa8851f5f279eD47a292f09CA2b6D40736a51788E",
+          data: "0xd09de08a",
+          value: 0n
+        }
+      ]
+    });
+
+    console.log(`Estimated fee: ${formatEther(results.estimatedFee)} ETH`);
+    console.log(`Estimated gas: ${results.estimatedGas} GAS`);
+    ```
+
+  </Step>
+</Steps>
+
+## Additional Resources
+
+- Check out the full example code for estimating gas for sponsored transactions [here](https://github.com/gelatodigital/gelato-sdk-examples/tree/main/examples/smart-wallet).
+- Learn more about different gas payment methods and how to use them effectively.

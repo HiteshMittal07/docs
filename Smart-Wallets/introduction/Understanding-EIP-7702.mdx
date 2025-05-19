@@ -1,0 +1,39 @@
+---
+title: "Understanding EIP-7702"
+description: "Understanding EIP-7702"
+---
+
+EIP-7702 is a proposed enhancement to the Ethereum protocol, slated for inclusion in the 2025 Pectra hardfork. It introduces a new transaction type that allows Externally Owned Accounts (EOAs) to delegate their execution logic to a smart contract. This is achieved via a "delegation designator" field, which specifies a smart contract address. When a transaction is sent to the EOA, the logic at the designated smart contract is executed, while preserving the EOA as the msg.sender.
+
+## Solving the EOA vs Smart Contract Divide
+
+Historically, Ethereum users have faced a tradeoff between simplicity and programmability:
+
+- **EOAs (Externally Owned Accounts)**
+
+  - Straightforward and widely adopted
+  - Lack advanced capabilities like transaction batching, gasless transactions, and multi-chain orchestration
+
+- **Smart Contract Accounts (SCAs)**
+  - Offer advanced features
+  - Require users to migrate funds and identity to a new address
+  - Lead to friction, fragmented liquidity, and user resistance
+
+EIP-7702 removes this divide, allowing EOAs to behave like smart accounts without changing their address. This preserves the user's on-chain history, identity, and asset location, while enabling rich smart account features.
+
+## Key Benefits
+
+By delegating to smart contracts at the protocol level, EIP-7702 enables:
+
+- Transaction Batching
+- Gas Sponsorships & ERC-20 Gas Payments (even cross-chain)
+- Passkey and Session-Based Signers
+- Account Portability & Identity Preservation
+
+## How It Works
+
+EIP-7702 introduces a new transaction type with an authorizations field. When the EOA signs an authorization message, this delegation is recorded by the network. All subsequent transactions sent to the EOA will trigger execution of the linked smart contract's logic. Unlike proxy contracts, this delegation is handled natively at the protocol level—removing the need for deploying per-user contracts and improving gas efficiency.
+
+---
+
+Up to this point, you've explored an overview of EIP-7702 and its functionality. Now, you'll gain an understanding of the key features of ERC-4337.

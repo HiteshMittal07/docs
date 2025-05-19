@@ -1,0 +1,59 @@
+---
+title: "EIP-7702 vs ERC-4337"
+description: "EIP-7702 vs ERC-4337"
+---
+
+This page explores the fundamental distinctions and underlying goals of ERC-4337 and EIP-7702, both designed to enhance Ethereum's account abstraction capabilities through different means.
+
+## Summary
+
+- **ERC-4337**: Introduces a smart account framework that integrates with existing infrastructure like bundlers and paymasters, all without needing any changes to the Ethereum protocol.
+- **EIP-7702**: Proposes a protocol-level enhancement that upgrades EOAs (Externally Owned Accounts) into smart accounts using a new transaction type. This requires a hard fork.
+
+Rather than being rivals, these two standards are complementary. In fact, they can work together: EIP-7702 can transform an EOA into a smart account, which can then interact seamlessly with the ERC-4337 infrastructure for relaying and gas abstraction.
+
+Given that ERC-4337 is already deployed and widely adopted, it serves as the primary standard for smart account usage today and will likely continue to be the foundation even for EIP-7702-enabled accounts.
+
+## ERC-4337 at a Glance
+
+**Protocol Upgrade Needed**: No
+
+**Architecture**: Implements a framework around the EntryPoint contract, allowing smart accounts to process and validate custom transactions through bundlers and paymasters.
+
+**Core Components**:
+
+- UserOperation (UserOp) structure
+- Bundlers (relayers of UserOps)
+- Paymasters (sponsors for gas fees)
+
+**Strengths**:
+
+- Fully operational without requiring protocol-level changes
+- Modular design supports plug-in components (e.g., paymasters, custom validation logic)
+
+**Limitations**:
+
+- Adds architectural complexity (e.g., separate mempool, increased calldata)
+
+## EIP-7702 Overview
+
+**Protocol Upgrade Needed**: Yes
+
+**Mechanism**: Introduces a new transaction type that temporarily transforms an EOA into a contract-based smart account for the duration of the transaction.
+
+**Key Feature**: Utilizes authorization_list to define behavior during this transition
+
+**Strengths**:
+
+- Simplified developer and user experience – the protocol handles the complexity internally
+- Uses the traditional transaction path – no need for separate infrastructure like EntryPoint or custom mempools
+
+**Limitations**:
+
+- Requires client upgrades and a hard fork, meaning adoption will vary across networks
+- Backward compatibility will be a concern during early rollout
+- The originating EOA maintains full control over the deployed smart account, making it harder to implement robust multisig or social recovery features
+
+## Conclusion
+
+ERC-4337 offers a flexible and extensible foundation already adopted by a growing ecosystem, while EIP-7702 simplifies the experience by pushing complexity into the protocol itself. Used together, they promise a powerful combination — enabling seamless onboarding of EOAs into smart account systems that benefit from modern abstraction features.

@@ -1,24 +1,32 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Gelato",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#FF3B57",
+    "light": "#FF3B57",
+    "dark": "#FF3B57"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Home",
         "groups": [
           {
             "group": "Get Started",
+            "pages": ["index", "quickstart", "development"]
+          },
+          {
+            "group": "Product Documentation",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "Smart-Wallets",
+              "Rollup-as-a-Service",
+              "RPC-Nodes",
+              "Web3-Functions",
+              "Relay",
+              "VRF",
+              "Oracles"
             ]
           },
           {
@@ -35,49 +43,168 @@
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Smart Wallets",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Introduction",
             "pages": [
-              "api-reference/introduction"
+              "Smart-Wallets/introduction/introduction",
+              "Smart-Wallets/introduction/Understanding-EIP-7702",
+              "Smart-Wallets/introduction/Understanding-ERC-4337",
+              "Smart-Wallets/introduction/EIP-7702-vs-ERC-4337"
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "How-To Guides",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "Smart-Wallets/How-To-Guides/Overview",
+              "Smart-Wallets/How-To-Guides/Sponsor-Gas",
+              "Smart-Wallets/How-To-Guides/Allow-user-to-pay-with-erc20",
+              "Smart-Wallets/How-To-Guides/Allow-user-to-pay-with-native",
+              "Smart-Wallets/How-To-Guides/Estimate-gas"
+            ]
+          },
+          {
+            "group": "React SDK",
+            "pages": [
+              "Smart-Wallets/React-SDK/Overview",
+              "Smart-Wallets/React-SDK/Use-Dynamic-or-Privy-signers"
+            ]
+          },
+          {
+            "group": "Additional Resources",
+            "pages": [
+              "Smart-Wallets/Additional-Resources/Demo",
+              "Smart-Wallets/Additional-Resources/Supported-networks"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Rollup as a Service",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["index", "quickstart", "development"]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "RPC Nodes",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["index", "quickstart", "development"]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Web3 Functions",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["index", "quickstart", "development"]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Relay",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["index", "quickstart", "development"]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "VRF",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["index", "quickstart", "development"]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Oracles",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["index", "quickstart", "development"]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://mintlify.com/community",
-          "icon": "slack"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/Gelato_logo.svg",
+    "dark": "/logo/Gelato_logo.svg"
   },
   "navbar": {
     "links": [
@@ -89,7 +216,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://app.gelato.network"
     }
   },
   "footer": {

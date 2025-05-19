@@ -1,0 +1,66 @@
+---
+title: "Understanding ERC-4337"
+description: "Understanding ERC-4337"
+---
+
+ERC-4337 is a standardized approach that implements account abstraction without requiring a hard fork or significant modifications to the Ethereum protocol. This is achieved by introducing a layer that handles user operations separately from the traditional transaction pool. The key components of ERC-4337 include:
+
+- **UserOperations** — These are transaction-like objects that encapsulate the intent of an account. They include all the necessary details to perform a transaction but allow for more flexible and complex logic.
+- **Bundlers** — Specialized entities that collect multiple UserOperations, package them together, and submit them as a single transaction to the Ethereum network. This mechanism not only optimizes network usage but also opens up new possibilities for transaction fee management and gas optimization.
+- **Smart Contract Wallets** — ERC-4337 leverages smart contracts to implement the core logic of account abstraction. These wallets can be customized to support features such as daily spending limits, delegated authority, or even recovery options if a user loses their keys.
+
+## Why ERC-4337?
+
+Unlike other proposals, ERC-4337 avoids changes to the consensus layer itself increasing the chance of faster adoption.
+
+## Terminology
+
+### Sender
+
+The sender is an ERC-4337 compatible smart contract wallet storing the users assets.
+It must implement the following interface:
+
+```solidity
+interface IAccount {
+    function validateUserOp(
+        UserOperation calldata userOp,
+        bytes32 userOpHash,
+        uint256 missingAccountFunds
+    ) external returns (uint256 validationData);
+}
+```
+
+### UserOperation
+
+A UserOperation is a pseudo-transaction object sent by the user into an alternate mempool.
+It contains the following fields:
+
+| Field                | Type    | Description                                                                                            |
+| :------------------- | :------ | :----------------------------------------------------------------------------------------------------- |
+| sender               | address | Account requesting the operation                                                                       |
+| nonce                | uint256 | Anti-replay parameter                                                                                  |
+| initCode             | bytes   | Account creation code (only required if not yet created i.e., first transaction)                       |
+| callData             | bytes   | Data passed to sender during execution                                                                 |
+| callGasLimit         | uint256 | Gas allocated for main execution                                                                       |
+| verificationGasLimit | uint256 | Gas allocated for verification                                                                         |
+| preVerificationGas   | uint256 | Amount allocated to compensate the bundler for any gas overhead not tracked on-chain by the EntryPoint |
+| maxFeePerGas         | uint256 | Similar to EIP-1559                                                                                    |
+| maxPriorityFeePerGas | uint256 | Similar to EIP-1559                                                                                    |
+| paymasterAndData     | bytes   | Paymaster address and callData (empty for self-sponsored transactions)                                 |
+| signature            | bytes   | Data passed to the account along with the nonce during the verification step                           |
+
+### EntryPoint
+
+The EntryPoint is a singleton smart contract that handles the verification and execution of bundles of UserOperations. This ensures much of the complicated logic is not required in the wallet itself and Instead, wallets trust the EntryPoint to perform proper validation (similar to a trusted forwarder).
+
+### Bundler
+
+A bundler is a node that bundles together multiple UserOperations from an alternate mempool and forwards them to the EntryPoint contract as a single transaction. The bundler executes transactions via EOAs which cover the transaction fees upfront and are later compensated. The Gelato Bundler is built on top of the existing Gelato Relay service.
+
+### Paymaster
+
+A paymaster is a service that covers transaction fees on behalf of the user. Unlike other solutions, Gelato does not rely on the on-chain EntryPoint to compensate transaction costs. Instead, fees are settled by the 1Balance paymaster post-execution which avoids overcharging users and reduces the overall on-chain footprint.
+
+---
+
+Next, explore the pros and cons of both EIP-7702 and ERC-4337, along with key differences to help deepen your understanding.
