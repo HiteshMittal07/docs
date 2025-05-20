@@ -1,71 +1,190 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: Gelato Developer Docs
+description: "Explore our API & SDK references, demos, and guides for building onchain apps."
+mode: "custom"
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.png"
-  alt="Hero Light"
+<div style={{ 
+  maxWidth: "1200px", 
+  margin: "0 auto", 
+  padding: "0 24px", 
+  marginTop: "60px",
+  fontFamily: "Inter, system-ui, sans-serif"
+}}>
+  <div style={{
+    textAlign: "left",
+    marginBottom: "32px",
+    maxWidth: "700px"
+  }}>
+    <h1 style={{
+      fontSize: "3.5rem",
+      fontWeight: "700",
+      color: "#FF3B57",
+      marginBottom: "20px"
+    }}>
+      Gelato Developer Docs
+    </h1>
+
+    <p style={{
+      fontSize: "1.25rem",
+      color: "#64748b",
+      marginBottom: "28px"
+    }}>
+      Explore our API & SDK references, demos, and guides for building onchain apps.
+    </p>
+
+    <a
+      href="Smart-Wallets"
+      style={{
+        display: "inline-block",
+        padding: "16px 40px",
+        background: "#FF3B57",
+        color: "#fff",
+        borderRadius: "999px",
+        fontWeight: "600",
+        fontSize: "1.2rem",
+        textDecoration: "none",
+        boxShadow: "0 4px 12px rgba(255, 59, 87, 0.2)",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+        cursor: "pointer"
+      }}
+      onMouseOver="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(255, 59, 87, 0.3)'"
+      onMouseOut="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 12px rgba(255, 59, 87, 0.2)'"
+    >
+      Get started →
+    </a>
+
+  </div>
+
+{" "}
+
+<hr
+  style={{
+    border: "none",
+    borderTop: "1px solid #23272f",
+    margin: "32px 0 28px 0",
+  }}
 />
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.png"
-  alt="Hero Dark"
-/>
 
-## Setting up
+{" "}
 
-The first step to world-class documentation is setting up your editing environments.
+<h2
+  style={{
+    fontSize: "2.1rem",
+    fontWeight: "700",
+    color: "#FF3B57",
+    marginBottom: "28px",
+    textAlign: "left",
+  }}
+>
+  Featured
+</h2>
 
-<CardGroup cols={2}>
-  <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
+  <div
+    style={{ 
+      display: "flex", 
+      gap: "32px", 
+      flexWrap: "wrap", 
+      justifyContent: "center",
+      alignItems: "stretch",
+      width: "100%"
+    }}
   >
-    Get your docs set up locally for easy development
-  </Card>
-  <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
-  >
-    Preview your changes before you push to make sure they're perfect
-  </Card>
-</CardGroup>
-
-## Make it yours
-
-Update your docs to your brand and add valuable content for the best user conversion.
-
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
-  </Card>
-  <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
-  >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
-  >
-    Check out our showcase of our favorite documentation
-  </Card>
-</CardGroup>
+    <div
+      style={{
+        background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
+        borderRadius: "24px",
+        padding: "32px",
+        flex: "1 1 400px",
+        minWidth: "320px",
+        maxWidth: "calc(50% - 16px)",
+        color: "#fff",
+        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+        transition: "transform 0.2s ease",
+        cursor: "pointer",
+        border: "1px solid rgba(255, 59, 87, 0.1)",
+        display: "flex",
+        flexDirection: "column"
+      }}
+      onMouseOver="this.style.transform='translateY(-4px)';this.style.border='1px solid rgba(255, 59, 87, 0.2)'"
+      onMouseOut="this.style.transform='translateY(0)';this.style.border='1px solid rgba(255, 59, 87, 0.1)'"
+    >
+      <img
+        src="/images/smart-wallet-sdk.png"
+        alt="Smart Wallet SDK"
+        style={{ 
+          width: "100%", 
+          height: "220px",
+          objectFit: "cover",
+          borderRadius: "16px", 
+          marginBottom: "24px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
+        }}
+      />
+      <h3 style={{ 
+        margin: "0 0 12px 0",
+        fontSize: "1.25rem",
+        fontWeight: "600",
+        color: "#FF3B57"
+      }}>
+        Smart Wallet SDK
+      </h3>
+      <p style={{ 
+        margin: 0,
+        fontSize: "1.05rem",
+        lineHeight: "1.6",
+        color: "#94a3b8"
+      }}>
+        Build a smart wallet with the Gelato Smart Wallet SDK.
+      </p>
+    </div>
+    <div
+      style={{
+        background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
+        borderRadius: "24px",
+        padding: "32px",
+        flex: "1 1 400px",
+        minWidth: "320px",
+        maxWidth: "calc(50% - 16px)",
+        color: "#fff",
+        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+        transition: "transform 0.2s ease",
+        cursor: "pointer",
+        border: "1px solid rgba(255, 59, 87, 0.1)",
+        display: "flex",
+        flexDirection: "column"
+      }}
+      onMouseOver="this.style.transform='translateY(-4px)';this.style.border='1px solid rgba(255, 59, 87, 0.2)'"
+      onMouseOut="this.style.transform='translateY(0)';this.style.border='1px solid rgba(255, 59, 87, 0.1)'"
+    >
+      <img
+        src="/images/rollup-as-a-service.png"
+        alt="Rollup as a Service"
+        style={{ 
+          width: "100%", 
+          height: "220px",
+          objectFit: "cover",
+          borderRadius: "16px", 
+          marginBottom: "24px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
+        }}
+      />
+      <h3 style={{ 
+        margin: "0 0 12px 0",
+        fontSize: "1.25rem",
+        fontWeight: "600",
+        color: "#FF3B57"
+      }}>
+        Rollup as a Service
+      </h3>
+      <p style={{ 
+        margin: 0,
+        fontSize: "1.05rem",
+        lineHeight: "1.6",
+        color: "#94a3b8"
+      }}>
+        Deploy your own Rollup with the Gelato Rollup as a Service.
+      </p>
+    </div>
+  </div>
+</div>

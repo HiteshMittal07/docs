@@ -15,30 +15,7 @@
         "groups": [
           {
             "group": "Get Started",
-            "pages": ["index", "quickstart", "development"]
-          },
-          {
-            "group": "Product Documentation",
-            "pages": [
-              "Smart-Wallets",
-              "Rollup-as-a-Service",
-              "RPC-Nodes",
-              "Web3-Functions",
-              "Relay",
-              "VRF",
-              "Oracles"
-            ]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
+            "pages": ["index"]
           }
         ]
       },
@@ -48,7 +25,7 @@
           {
             "group": "Introduction",
             "pages": [
-              "Smart-Wallets/introduction/introduction",
+              "Smart-Wallets/introduction/Overview",
               "Smart-Wallets/introduction/Understanding-EIP-7702",
               "Smart-Wallets/introduction/Understanding-ERC-4337",
               "Smart-Wallets/introduction/EIP-7702-vs-ERC-4337"
@@ -82,22 +59,35 @@
       },
       {
         "tab": "Rollup as a Service",
-        "groups": [
+        "pages": [
+          "Rollup-as-a-Service/introduction",
           {
-            "group": "Get Started",
-            "pages": ["index", "quickstart", "development"]
+            "group": "Rollup Stacks",
+            "pages": [
+              "Rollup-as-a-Service/Rollup-stacks/ABC",
+              "Rollup-as-a-Service/Rollup-stacks/Arbitrum-orbit",
+              "Rollup-as-a-Service/Rollup-stacks/Op"
+            ]
           },
           {
-            "group": "Essentials",
+            "group": "How-To Guides",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "Rollup-as-a-Service/How-To-Guides/Deploy-your-own-rollup",
+              "Rollup-as-a-Service/How-To-Guides/Run-a-abc-node",
+              "Rollup-as-a-Service/How-To-Guides/Run-an-orbit-node",
+              "Rollup-as-a-Service/How-To-Guides/Run-an-op-node",
+              "Rollup-as-a-Service/How-To-Guides/Run-a-verifier-node"
             ]
-          }
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "Rollup-as-a-Service/Customization/Customize-your-rollup",
+              "Rollup-as-a-Service/Customization/Customize-your-node",
+              "Rollup-as-a-Service/Customization/Customize-your-verifier"
+            ]
+          },
+          "Rollup-as-a-Service/public-testnet"
         ]
       },
       {
@@ -105,18 +95,7 @@
         "groups": [
           {
             "group": "Get Started",
-            "pages": ["index", "quickstart", "development"]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
+            "pages": ["index"]
           }
         ]
       },
@@ -125,18 +104,7 @@
         "groups": [
           {
             "group": "Get Started",
-            "pages": ["index", "quickstart", "development"]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
+            "pages": ["index"]
           }
         ]
       },
@@ -145,18 +113,7 @@
         "groups": [
           {
             "group": "Get Started",
-            "pages": ["index", "quickstart", "development"]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
+            "pages": ["index"]
           }
         ]
       },
@@ -165,18 +122,7 @@
         "groups": [
           {
             "group": "Get Started",
-            "pages": ["index", "quickstart", "development"]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
+            "pages": ["index"]
           }
         ]
       },
@@ -185,18 +131,16 @@
         "groups": [
           {
             "group": "Get Started",
-            "pages": ["index", "quickstart", "development"]
-          },
+            "pages": ["index"]
+          }
+        ]
+      },
+      {
+        "tab": "1Balance",
+        "groups": [
           {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
+            "group": "Get Started",
+            "pages": ["index"]
           }
         ]
       }
