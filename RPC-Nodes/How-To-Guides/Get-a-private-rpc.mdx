@@ -1,0 +1,48 @@
+---
+title: "Get a Private RPC"
+---
+
+To fully leverage Gelato's high-performance RPC Node service, it's recommended to use authenticated access with API keys. While public endpoints are available, they are rate-limited, making API keys the optimal choice for consistent, scalable access.
+
+When using an API key, Compute Units (CUs) are allocated at the organization level, meaning your usage is pooled across all networks and keys within your Gelato account. This provides a flexible way to manage your CU consumption across multiple projects. Creating an API key is quick and simple, enabling you to unlock seamless, high-performance access to Gelato-supported chains.
+
+## Creating your API Key
+
+To start accessing Gelato's high-performance RPC Nodes, you'll need to create an API key. The steps below outline how you can quickly generate and manage your API keys within the Gelato dashboard.
+
+### Step 1: Navigate to the RPC Node section
+
+Once logged in, go to the RPC Nodes section on the sidebar.
+
+You will see a dashboard with your current plan details, including usage and available API keys.
+
+Under My keys, click on the blue Create button.
+
+<img src="/images/rpc-node-dashboard.png" alt="RPC Nodes Dashboard" />
+
+### Step 2: Enter Key Name
+
+A dialog box will appear, prompting you to name your new API key.
+
+<Tip>
+Choose a descriptive name for your key (e.g., "ProjectName-Mainnet" or "TestProject-RPC").
+</Tip>
+
+After entering the name, click Create to generate the key.
+
+<img src="/images/create-node-key.png" alt="RPC Nodes Create Key" />
+
+### Step 3: Manage and Use Your API Key
+
+Your new API key will be listed under the My keys section.
+
+You can now click on the key to view its details, including:
+
+- Success rate (last 24 hours)
+- Median response time
+- Total requests
+- CU usage and more
+
+You'll also see the supported networks (HTTP and WebSocket endpoints) for your key at the bottom of the key details page.
+
+<img src="/images/key-dashboard.png" alt="RPC Nodes Key Details" />

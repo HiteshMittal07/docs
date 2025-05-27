@@ -1,0 +1,84 @@
+---
+title: "Calculate Compute Units"
+---
+
+## Understanding Compute Units (CUs)
+
+### What are Compute Units
+Compute Units (CUs) measure the computational resources consumed by your API calls. They provide a standardized way to quantify usage across different types of requests.
+
+### Why use Compute Units?
+CUs ensure transparent and fair pricing. Instead of flat rates, you pay based on the actual computational cost of your requests. This approach prevents overpaying for simple queries while accurately reflecting resource usage for complex operations.
+
+## Rollup Multiplier
+
+Not all rollups require the same computational power to process API requests. Some are lightweight, while others demand significantly more resources. To account for these variations, we apply a Rollup Multiplier to Compute Units (CUs), ensuring that pricing accurately reflects the underlying computational cost.
+
+### How Compute Units Are Calculated
+```
+Method Responses × Rollups Multiplier = Compute Units (CUs)
+```
+
+This ensures that high-throughput rollups, which consume more resources, are fairly priced compared to smaller chains. By aligning costs with computational intensity, Rollup Multipliers prevent inefficiencies, optimize pricing, and help developers scale seamlessly.
+
+| Network | Methods | Multipliers |
+|---------|---------|-------------|
+| All Rollups | All methods* | 1 |
+
+## CU Costs for Common Calls
+
+| Method | CU Cost |
+|--------|---------|
+| batch | CU of method # of times the method is called |
+| debug_traceBlockByHash | 170 |
+| debug_traceBlockByNumber | 170 |
+| debug_traceCall | 170 |
+| debug_traceTransaction | 170 |
+| erigon_forks | 24 |
+| erigon_getHeaderByHash | 24 |
+| erigon_getHeaderByNumber | 24 |
+| erigon_getLogsByHash | 24 |
+| erigon_issuance | 24 |
+| eth_accounts | 10 |
+| eth_blockNumber | 10 |
+| eth_call | 26 |
+| eth_chainId | 0 |
+| eth_createAccessList | 10 |
+| eth_estimateGas | 87 |
+| eth_feeHistory | 10 |
+| eth_gasPrice | 19 |
+| eth_getBalance | 19 |
+| eth_getBlockByHash | 21 |
+| eth_getBlockByNumber | 16 |
+| eth_getBlockReceipts | 500 |
+| eth_getBlockTransactionCountByHash | 20 |
+| eth_getBlockTransactionCountByNumber | 20 |
+| eth_getCode | 19 |
+| eth_getFilterChanges | 20 |
+| eth_getFilterLogs | 75 |
+| eth_getLogs | 75 |
+| eth_getProof | 21 |
+| eth_getStorageAt | 17 |
+| eth_getTransactionByBlockHashAndIndex | 15 |
+| eth_getTransactionByBlockNumberAndIndex | 15 |
+| eth_getTransactionByHash | 17 |
+| eth_getTransactionCount | 26 |
+| eth_getTransactionReceipt | 15 |
+| eth_getUncleByBlockHashAndIndex | 15 |
+| eth_getUncleByBlockNumberAndIndex | 15 |
+| eth_getUncleCountByBlockHash | 15 |
+| eth_getUncleCountByBlockNumber | 15 |
+| eth_maxPriorityFeePerGas | 10 |
+| eth_newBlockFilter | 20 |
+| eth_newFilter | 20 |
+| eth_newPendingTransactionFilter | 20 |
+| eth_protocolVersion | 0 |
+| eth_sendRawTransaction | 250 |
+| eth_subscribe | 10 |
+| eth_syncing | 0 |
+| eth_uninstallFilter | 10 |
+| eth_unsubscribe | 10 |
+| net_listening | 0 |
+| net_version | 0 |
+| web3_clientVersion | 15 |
+| web3_sha3 | 15 |
