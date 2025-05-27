@@ -16,7 +16,7 @@ This guide will show you how to sponsor gas for transactions using Smart Wallets
     ```
   </Step>
   <Step title="Creating a Wallet Client">
-    Quickly get started by creating a wallet client using createWalletClient from viem with local account for your specified network. Checkout supported networks [here](https://docs.gelato.network/developer-services/relay/quick-start/supported-networks).
+    Quickly get started by creating a wallet client using createWalletClient from viem with local account for your specified network. Checkout supported networks [here](/Smart-Wallets/Additional-Resources/Supported-networks).
     ```typescript
     const privateKey = (process.env.PRIVATE_KEY ?? generatePrivateKey()) as Hex;
     const account = privateKeyToAccount(privateKey);
@@ -30,8 +30,10 @@ This guide will show you how to sponsor gas for transactions using Smart Wallets
 
   </Step>
   <Step title="Creating a Sponsor API Key">
-    Create a Sponsor API Key by visiting the [Gelato App](https://app.gelato.network/) and navigating to the Relay section. Create a new app, select the required networks, and copy the generated Sponsor API Key.
-    For detailed instructions, [click here](https://docs.gelato.network/developer-services/relay/quick-start/create-sponsor-api-key) to learn more about creating a Sponsor API Key.
+    Create a Sponsor API Key by visiting the [Gelato App](https://app.gelato.network/) and navigating to the Relay section. 
+    
+    Create a new app, select the required networks, and copy the generated Sponsor API Key.
+    For detailed instructions, [click here](/Smart-Wallets/How-To-Guides/Create-a-sponsor-api-key) to learn more about creating a Sponsor API Key.
   </Step>
   <Step title="Creating a Smart Wallet Client">
     <Tabs>

@@ -1,0 +1,41 @@
+---
+title: "Create Dynamic's Environment ID"
+description: "Learn how to create and manage a Dynamic Environment ID for wallet providers"
+---
+
+<Steps>
+  <Step title="Create Your Gelato Account">
+    Sign up on the [Gelato RaaS Dashboard](https://raas.gelato.network/dashboard) to create an account and begin setting up wallet providers like Dynamic using the Smart Wallet React SDK.
+  </Step>
+
+  <Step title="Create a Wallets Project">
+    Once you're logged into your Gelato account, navigate to create a new Wallet Project. This project will serve as the foundation for managing your wallet providers and configurations.
+
+    <img height="200" src="/images/create-wallet-project.png" />
+
+  </Step>
+
+  <Step title="Retrieve Your Environment ID">
+    After creating the Wallet Project, navigate to its dashboard to find your Environment ID.
+
+    Click on View Config, then either copy the Dynamic's Environment ID or the entire configuration code, depending on your needs.
+
+    <Check>Keep your Environment ID secure as it's essential for configuring wallet providers in your application.</Check>
+
+    <img height="200" src="/images/get-environment-id.png" />
+
+  </Step>
+
+  <Step title="Configure Networks">
+    By default, Ethereum Mainnet is selected as the network. However, you can specify multiple networks in the Network section based on your requirements.
+
+    You can check the list of supported networks [here](/Smart-Wallets/Additional-Resources/Supported-networks).
+
+    <img height="200" src="/images/configure-networks.png" />
+
+  </Step>
+</Steps>
+
+## Next Steps
+
+Now that you've created your Environment ID, you can proceed to integrate it into your code to configure wallet providers in your application. Learn how to use Dynamic as a wallet provider [here](/Smart-Wallets/React-SDK/Use-Dynamic-or-Privy-signers).
