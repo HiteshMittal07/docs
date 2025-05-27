@@ -1,0 +1,50 @@
+---
+title: "Celestia"
+---
+
+Celestia offers a scalable modular data availability network that securely scales with user numbers, enabled by Data Availability Sampling (DAS). It facilitates the deployment of high-throughput and low-cost validium and sovereign rollups on Gelato. Layer 2 solutions utilize Celestia as a network for publishing transaction data, making it available for download by anyone.
+
+## Celestia DA Layer Key Features
+
+### Dynamic Scaling
+Celestia uses data availability sampling to enable scaling that increases with the number of users, ensuring dynamic adaptability to growing demands.
+
+### Virtual Machine Flexibility
+Offers the ability to choose any Virtual Machine, facilitating the development of applications with specialized features and diverse use-cases.
+
+### Ease of Deployment
+Users can deploy their own L2 Blockchain quickly, with a simplicity comparable to deploying a smart contract.
+
+## Design Principles
+
+### Data Availability Sampling (DAS)
+This process allows light nodes in Celestia to verify the availability of block data without downloading the entire block. Light nodes randomly sample small portions of the data, and if these samples are verified, it indicates that the full block's data is likely available. This method ensures efficient and scalable data verification.
+
+### Namespaced Merkle Trees (NMTs)
+NMTs are used to organize block data into distinct sections (namespaces), each corresponding to different applications like rollups. They enable applications to download and verify only the data relevant to them, ignoring data from other applications. This system ensures that applications receive all the necessary data for their specific namespace.
+
+## Celestia with Gelato Execution Frameworks
+
+Gelato integrates with Celestia so execution frameworks post the calldata to Celestia rather than directly on Ethereum. This reduces data storage costs significantly and enables higher transaction throughput making the roll-ups more attractive for applications that require high performance and lower fees.
+
+### Celestia x Arbitrum Orbit
+
+Gelato's support for Celestia integration with Arbitrum Orbit provides developers with an alternative data availability layer facilitating the launch of high-throughput, optimistic-powered Ethereum Layer 2 chains. This integration enables the deployment of Arbitrum Rollups using Celestia for data availability instead of Ethereum, scaling securely with numbers of users' with data availability sampling (DAS).
+
+In the case of ERC20 transfer rollup transactions on OP stack with 1M transactions and an average callData size of 120 bytes:
+- Expected cost: $122,413
+- Using Celestia for callData: $347
+- Savings: 99.74%
+
+### Celestia x OP Stack
+
+Gelato's support for Celestia's integration with OP Stack facilitates the launch of high-throughput, optimistic-powered Ethereum Layer 2 chains made possible by Celestia's data availability sampling (DAS). If Celestia experiences downtime or temporary unavailability, L2s can fallback to posting transactions as calldata on Ethereum or another DA layer to maintain data availability.
+
+In the case of ERC20 transfer rollup transactions on OP stack with 1M transactions and an average callData size of 120 bytes:
+- Expected cost: $78,558
+- Using Celestia for callData: $332
+- Savings: 99.61%
+
+## Next Steps
+
+Get more information about Celestia, or [Schedule a call](/contact) to set up your custom Op Stack Gelato L2 testnet.

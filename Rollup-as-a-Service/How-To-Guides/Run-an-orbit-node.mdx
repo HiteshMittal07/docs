@@ -1,0 +1,115 @@
+---
+title: "Run an Arbitrum Orbit Node"
+description: "Learn how to run an Arbitrum Orbit node on your local machine"
+---
+
+This guide provides step-by-step instructions for running a Arbitrum Orbit node on your local machine. You can also use this as a basis for running nodes of arbitrary orbit rollups on Gelato.
+
+## Prerequisites
+
+Before you begin, ensure you have the latest Docker image as mentioned in the Arbitrum Docs:
+
+<Card title="Run Full Node" icon="link" href="https://docs.arbitrum.io/run-arbitrum-node/run-full-node">
+Arbitrum
+</Card>
+
+Get the `chain-info.json` from the dashboard by heading over to [https://raas.gelato.network/chains](https://raas.gelato.network/chains) and then downloading the "Genesis File" from the "Details" tab.
+
+## Minimum Hardware Requirements
+
+| Component | Minimum Requirement               |
+| --------- | --------------------------------- |
+| CPU       | 2-4 core CPU (For AWS: t3 xLarge) |
+| RAM       | 8-16 GB                           |
+| Disk      | Depends on traffic volume         |
+
+<Steps>
+  <Step title="Create a directory for the chain">
+    ```bash
+    mkdir -p ~/orbit-node
+    ```
+  </Step>
+
+  <Step title="Run the node">
+    ```bash
+    docker run --rm -it  -v ~/orbit-node:/home/user/.arbitrum \
+      -p 0.0.0.0:8547:8547 \
+      -p 0.0.0.0:8548:8548 \
+       offchainlabs/nitro-node:{VERSION} \
+      --parent-chain.connection.url={PARENT_CHAIN_RPC} \
+      --parent-chain.blob-client.beacon-url={PARENT_BEACON_RPC} \
+      --parent-chain.node-url={PARENT_CHAIN_NODE_URL} \
+      --chain.id={CHAIN_ID} \
+      --chain.name="{CHAIN_NAME}" \
+      --chain.info-json='[{CHAIN_INFO_FROM_DASHBOARD}]' \
+      --execution.forwarding-target={CHAIN_RPC} \
+      --execution.rpc.tx-allow-unprotected=false \
+      --execution.rpc.gas-cap=50000000 \
+      --execution.rpc.tx-fee-cap=1 \
+      --execution.sequencer.enable=false \
+      --execution.tracing.enable \
+      --node.sequencer=false \
+      --node.staker.enable=false \
+      --node.batch-poster.enable=false \
+      --node.feed.input.url={FEED_URL} \
+      --node.data-availability.enable \
+      --node.data-availability.sequencer-inbox-address={SEQUENCER_INBOX_ADDRESS} \
+      --node.data-availability.parent-chain-node-url={PARENT_CHAIN_RPC} \
+      --node.data-availability.rest-aggregator.enable \
+      --node.data-availability.rest-aggregator.urls={DAS_AGGREGATOR_URL} \
+      --node.dangerous.disable-blob-reader=true \
+      --http.addr=0.0.0.0 \
+      --http.port=8547 \
+      --http.vhosts="*" \
+      --http.corsdomain="*" \
+      --http.api=net,web3,eth,debug,arbtrace,arb \
+      --ws.addr=0.0.0.0 \
+      --ws.port=8548 \
+      --ws.origins="*" \
+      --ws.api=eth,net,web3,arb,txpool,debug \
+      --rpc.max-batch-response-size=200000000 \
+      --metrics \
+      --metrics-server.addr=0.0.0.0 \
+      --metrics-server.port=6070 \
+      --log-type=json \
+      --log-level=info
+    ```
+  </Step>
+
+  <Step title="Check the logs">
+    ```bash
+    INFO [07-02|06:00:56.125] created jwt file                         filename=/home/user/.arbitrum/jwtsecret
+    INFO [07-02|06:00:56.125] Running Arbitrum nitro node              revision=v2.3.4-b4cc111 vcs.time=2024-05-02T11:51:35-05:00
+    INFO [07-02|06:00:57.263] connected to l1 chain                    l1url=https://eth.llamarpc.com l1chainid=1
+    WARN [07-02|06:00:57.969] Getting file info                        error="stat : no such file or directory"
+    WARN [07-02|06:00:57.973] Getting file info                        error="stat /workspace/target/machines: no such file or directory"
+    WARN [07-02|06:00:57.974] Getting file info                        error="stat /home/user/machines: no such file or directory"
+    INFO [07-02|06:00:57.976] Using leveldb as the backing database
+    INFO [07-02|06:00:57.977] Allocated cache and file handles         database=/home/user/.arbitrum/real/nitro/l2chaindata cache=16.00MiB handles=16 readonly=true
+    INFO [07-02|06:00:57.977] Using leveldb as the backing database
+    INFO [07-02|06:00:57.977] Allocated cache and file handles         database=/home/user/.arbitrum/chainName/nitro/l2chaindata cache=2.00GiB handles=512
+    INFO [07-02|06:00:57.998] Using LevelDB as the backing database
+    INFO [07-02|06:00:58.019] Opened ancient database                  database=/home/user/.arbitrum/chainName/nitro/l2chaindata/ancient/chain readonly=false
+    INFO [07-02|06:00:58.019] Initializing                             ancients=0 genesisBlockNr=0
+    ...
+    ```
+  </Step>
+
+  <Step title="Check the node status">
+    ```bash
+    curl -X POST http://localhost:8547/ \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+    ```
+  </Step>
+</Steps>
+
+## Shutting Down the Node
+
+<Info>
+  To ensure the current state is saved properly, allow a graceful shutdown:
+</Info>
+
+```bash
+docker stop --time=300 $(docker ps -aq)
+```

@@ -1,0 +1,30 @@
+---
+title: "Custom Gas Token"
+---
+
+With Gelato Rollups, you have the option to designate an ERC20 token as the native token for your rollup. This section covers the requirements and steps for integrating custom gas tokens in your deployments on the OP Stack and Arbitrum Orbit Stack.
+
+## ERC20 Token Requirements
+
+To use a custom gas token, the ERC20 token must meet the following requirements:
+
+1. **ERC20 Token Smart Contract Address**: Ensure the token contract is deployed and you have the contract address.
+
+2. **Decimals**: The token must have 18 decimal places (dp).
+
+3. **Token Type**: The token must be a non-rebasing token, meaning its total supply does not change due to rebasing mechanisms.
+
+
+## Arbitrum Orbit Configuration
+
+Arbitrum Orbit requires the custom gas tokens to be utilized as part of the deployment process. Follow these steps to integrate a custom gas token with Arbitrum Orbit:
+
+1. **Verify Token Compatibility**: Ensure your ERC20 token meets the specified requirements.
+
+2. **Configure Deployment Settings**: Set the ERC20 token contract address in your deployment configuration.
+
+3. **Deploy Your Contract**: Proceed with the deployment. The custom gas tokens will be utilized as part of the deployment process.
+
+## Next Steps
+
+Get more information about Custom Gas Tokens, or [Schedule a call](/contact) to set up your custom Op Stack Gelato L2 testnet.

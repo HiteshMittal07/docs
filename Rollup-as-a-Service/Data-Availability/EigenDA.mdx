@@ -1,0 +1,39 @@
+---
+title: "EigenDA"
+---
+
+EigenDA is a high-throughput, decentralized data availability (DA) service designed for rollups on the Ethereum blockchain. It uses EigenLayer restaking primitives to ensure a secure and scalable infrastructure for data availability.
+
+## Key Features
+
+### Scalability
+EigenDA offers scalable data availability with a throughput of up to 10 MBps, demonstrated in private testing. Plans to scale to 1 GBps are underway, enhancing the performance of blockchain networks significantly.
+
+### Security
+EigenDA leverages EigenLayer's restaking primitives to provide a secure DA infrastructure. Techniques like erasure coding and KZG commitments ensure efficient and secure data storage and retrieval.
+
+### Cost Efficiency
+EigenDA minimizes the costs associated with data availability by leveraging a shared security model. This approach reduces capital costs of staking and operational costs for operators.
+
+## Design Principles
+
+### Erasure Coding and KZG Commitments
+EigenDA uses erasure coding to break data into smaller chunks, which are then distributed across multiple operators. KZG commitments ensure the integrity and availability of these chunks.
+
+### Congestion Management
+EigenDA manages congestion through higher throughput capabilities and bandwidth reservation, making data availability more predictable and cost-effective for rollups.
+
+## Components
+
+1. **Operators** :
+Run EigenDA node software and are responsible for storing data chunks.
+
+2. **Disperser** :
+An untrusted service that encodes blobs, generates KZG commitments and proofs, and registers storage on Ethereum.
+
+3. **Retrievers** :
+Query operators for data chunks, verify them, and reconstruct the original blob for users.
+
+## Next Steps
+
+Get more information about EigenDA, or [Schedule a call](/contact) to set up your custom Op Stack Gelato L2 testnet.

@@ -1,0 +1,28 @@
+---
+title: "Avail"
+---
+
+Gelato RaaS leverages Avail as a data availability (DA) layer. Avail provides a fast and secure data and consensus layer enabling the creation of hyperefficient L2 blockchains such as Validiums and Plasma, for ultimate control of your state, and execution environment.
+
+## Avail DA Layer Key Features
+
+### Secure Verifiable Data
+Avail allows light clients to easily verify data availability through sampling over a peer-to-peer network, and inherit full node-level security and validation directly from the DA layer.
+
+### Simple Blockchain Integration
+Avail's modular approach eliminates the need for developers to manage validator sets or understand tokenomics.
+
+### Flexible Execution Environment
+Avail's data-agnostic nature accommodates multiple execution environments, such as EVM, WASM, and custom new runtimes, providing a flexible foundation for a wide range of blockchain applications.
+
+## Design Principles
+
+### Erasure Coding
+Erasure coding in Avail works by adding layers of redundancy to transaction data to ensure its integrity and reliability. When transactions are processed in Avail, they are split into parts that are duplicated and can be used to reconstruct the full data. This means that even if some parts are lost or corrupted, the complete data can still be recovered.
+
+### Data Availability Sampling (DAS)
+Avail's light clients perform data availability sampling by randomly sampling small sections of block data to verify their correctness. Combined with erasure coding and KZG polynomial commitments, this technique enables Avail clients to provide strong guarantees of data availability, nearly 100%, without relying on fraud proofs and with only a minimal number of queries.
+
+## Next Steps
+
+Get more information about Avail, or [Schedule a call](/contact) to set up your custom Op Stack Gelato L2 testnet.
