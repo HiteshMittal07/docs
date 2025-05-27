@@ -20,6 +20,34 @@
         ]
       },
       {
+        "tab": "Getting Started",
+        "pages": [
+          "Getting-started/introduction",
+          {
+            "group": "Products",
+            "pages": [
+              "Smart-Wallets",
+              "Rollup-as-a-Service",
+              "RPC-Nodes",
+              "Web3-Functions",
+              "Relay",
+              "VRF",
+              "Oracles",
+              "1Balance"
+            ]
+          },
+          {
+            "group": "Gelato DAO",
+            "pages": [
+              "Getting-started/Gelato-DAO/DAO-&-Token",
+              "Getting-started/Gelato-DAO/Gel-Token-Contracts",
+              "Getting-started/Gelato-DAO/Governance-Process",
+              "Getting-started/Gelato-DAO/Social-media"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Smart Wallets",
         "groups": [
           {
@@ -35,6 +63,7 @@
             "group": "How-To Guides",
             "pages": [
               "Smart-Wallets/How-To-Guides/Overview",
+              "Smart-Wallets/How-To-Guides/Create-a-sponsor-api-key",
               "Smart-Wallets/How-To-Guides/Sponsor-Gas",
               "Smart-Wallets/How-To-Guides/Allow-user-to-pay-with-erc20",
               "Smart-Wallets/How-To-Guides/Allow-user-to-pay-with-native",
@@ -45,6 +74,7 @@
             "group": "React SDK",
             "pages": [
               "Smart-Wallets/React-SDK/Overview",
+              "Smart-Wallets/React-SDK/Create-Dynamic's-Environment-Id",
               "Smart-Wallets/React-SDK/Use-Dynamic-or-Privy-signers"
             ]
           },
@@ -80,22 +110,56 @@
             ]
           },
           {
-            "group": "Customization",
+            "group": "Data Availability",
             "pages": [
-              "Rollup-as-a-Service/Customization/Customize-your-rollup",
-              "Rollup-as-a-Service/Customization/Customize-your-node",
-              "Rollup-as-a-Service/Customization/Customize-your-verifier"
+              "Rollup-as-a-Service/Data-Availability/Celestia",
+              "Rollup-as-a-Service/Data-Availability/Avail",
+              "Rollup-as-a-Service/Data-Availability/EigenDA"
             ]
           },
-          "Rollup-as-a-Service/public-testnet"
+          {
+            "group": "Customization",
+            "pages": [
+              "Rollup-as-a-Service/Customization/custom-gas-token",
+              "Rollup-as-a-Service/Customization/public-testnet",
+              "Rollup-as-a-Service/Customization/verifier-node-package"
+            ]
+          },
+          {
+            "group": "Marketplace",
+            "pages": [
+              "Rollup-as-a-Service/Marketplace/Gelato-Services",
+              "Rollup-as-a-Service/Marketplace/Data-Indexers",
+              "Rollup-as-a-Service/Marketplace/Block-Explorers",
+              "Rollup-as-a-Service/Marketplace/Oracles",
+              "Rollup-as-a-Service/Marketplace/Bridges",
+              "Rollup-as-a-Service/Marketplace/Account-Abstraction",
+              "Rollup-as-a-Service/Marketplace/On-&-Off-ramp",
+              "Rollup-as-a-Service/Marketplace/Community",
+              "Rollup-as-a-Service/Marketplace/Identity-&-KYC",
+              "Rollup-as-a-Service/Marketplace/Others"
+            ]
+          }
         ]
       },
       {
         "tab": "RPC Nodes",
-        "groups": [
+        "pages": [
+          "RPC-Nodes/introduction",
           {
-            "group": "Get Started",
-            "pages": ["index"]
+            "group": "How-To Guides",
+            "pages": [
+              "RPC-Nodes/How-To-Guides/Get-a-private-rpc",
+              "RPC-Nodes/How-To-Guides/Calculate-compute-units"
+            ]
+          },
+          {
+            "group": "Additional Resources",
+            "pages": [
+              "RPC-Nodes/Additional-Resources/Pricing-plans",
+              "RPC-Nodes/Additional-Resources/Supported-networks",
+              "RPC-Nodes/Additional-Resources/FAQ"
+            ]
           }
         ]
       },
@@ -154,20 +218,20 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "https://discord.com/invite/ApbA39BKyJ"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app.gelato.network"
+      "href": "https://raas.gelato.network/dashboard"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/gelatonetwork",
+      "github": "https://github.com/gelatodigital",
+      "linkedin": "https://linkedin.com/company/gelatonetwork"
     }
   }
 }
