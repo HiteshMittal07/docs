@@ -289,10 +289,31 @@
       },
       {
         "tab": "VRF",
-        "groups": [
+        "pages": [
           {
-            "group": "Get Started",
-            "pages": ["index"]
+            "group": "Introduction",
+            "pages": [
+              "VRF/Introduction/Overview",
+              "VRF/Introduction/How-Gelato-VRF-Works"
+            ]
+          },
+          "VRF/Security-considerations",
+          {
+            "group": "How-To Guides",
+            "pages": [
+              "VRF/How-To-Guides/Deploy-your-contract-inheriting-gelato-VRF",
+              "VRF/How-To-Guides/Create-a-VRF-Task",
+              "VRF/How-To-Guides/Create-a-Fallback-VRF",
+              "VRF/How-To-Guides/Migrate-from-Chainlink-VRF"
+            ]
+          },
+          {
+            "group": "Additional Resources",
+            "pages": [
+              "VRF/Additional-Resources/Templates",
+              "VRF/Additional-Resources/Supported-networks",
+              "VRF/Additional-Resources/Pricing-and-Rate-limits"
+            ]
           }
         ]
       },
