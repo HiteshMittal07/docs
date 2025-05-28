@@ -319,10 +319,29 @@
       },
       {
         "tab": "Oracles",
-        "groups": [
+        "pages": [
+          "Oracles/introduction",
           {
-            "group": "Get Started",
-            "pages": ["index"]
+            "group": "How-To Guides",
+            "pages": [
+              "Oracles/How-To-Guides/Create-a-Oracle-Task",
+              "Oracles/How-To-Guides/Migrate-from-Chainlink-Oracles"
+            ]
+          },
+          {
+            "group": "Data Providers",
+            "pages": [
+              "Oracles/Data-Providers/Stork",
+              "Oracles/Data-Providers/Choas-Labs"
+            ]
+          },
+          {
+            "group": "Additional Resources",
+            "pages": [
+              "Oracles/Additional-Resources/Supported-networks",
+              "Oracles/Additional-Resources/Pricing-and-Rate-limits",
+              "Oracles/Additional-Resources/Available-price-feeds"
+            ]
           }
         ]
       },
