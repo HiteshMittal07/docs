@@ -223,8 +223,67 @@
         "tab": "Relay",
         "groups": [
           {
-            "group": "Get Started",
-            "pages": ["index"]
+            "group": "Introduction",
+            "pages": [
+              "Relay/Introduction/Overview",
+              "Relay/Introduction/What-is-Relaying?"
+            ]
+          },
+          {
+            "group": "Security Considerations",
+            "pages": [
+              "Relay/Security-considerations/Overview",
+              "Relay/Security-considerations/ERC2771-DelegateCall-vulnerability"
+            ]
+          },
+          {
+            "group": "How-To Guides",
+            "pages": [
+              "Relay/How-To-Guides/Create-a-sponsor-api-key",
+              "Relay/How-To-Guides/Send-sponsored-transactions",
+              "Relay/How-To-Guides/Allow-your-target-contract-to-pay-for-gas",
+              "Relay/How-To-Guides/Allow-your-users-to-pay-with-ERC20",
+              "Relay/How-To-Guides/Decode-original-msg.sender-in-target-contract",
+              "Relay/How-To-Guides/Track-your-relay-request"
+            ]
+          },
+          {
+            "group": "ERC-2771 (Recommended)",
+            "pages": [
+              "Relay/ERC2771-Recommended/SponsoredCall-ERC2771",
+              "Relay/ERC2771-Recommended/CallwithSyncFee-ERC2771"
+            ]
+          },
+          {
+            "group": "Non-ERC2771",
+            "pages": [
+              "Relay/Non-ERC2771/SponsoredCall",
+              "Relay/Non-ERC2771/CallwithSyncFee"
+            ]
+          },
+          {
+            "group": "Subscription & Payments",
+            "pages": [
+              "Relay/Subscription-and-payments/Overview",
+              "Relay/Subscription-and-payments/1Balance-and-Relay",
+              "Relay/Subscription-and-payments/SyncFee-payment-tokens",
+              "Relay/Subscription-and-payments/Relay-pricing"
+            ]
+          },
+          {
+            "group": "API & FeeOracle",
+            "pages": [
+              "Relay/API-&-FeeOracle/Relay-API",
+              "Relay/API-&-FeeOracle/Gelato's-Fee-Oracle"
+            ]
+          },
+          {
+            "group": "Additional Resources",
+            "pages": [
+              "Relay/Additional-Resources/Templates",
+              "Relay/Additional-Resources/Supported-networks",
+              "Relay/Additional-Resources/ERC2771-Migration-Guide"
+            ]
           }
         ]
       },
