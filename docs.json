@@ -347,11 +347,11 @@
       },
       {
         "tab": "1Balance",
-        "groups": [
-          {
-            "group": "Get Started",
-            "pages": ["index"]
-          }
+        "pages": [
+          "1Balance/1Balance-Alerts",
+          "1Balance/Subscriptions-Notifications",
+          "1Balance/Subscriptions-Plans",
+          "1Balance/USDC-Addresess"
         ]
       }
     ]
