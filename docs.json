@@ -165,10 +165,57 @@
       },
       {
         "tab": "Web3 Functions",
-        "groups": [
+        "pages": [
           {
-            "group": "Get Started",
-            "pages": ["index"]
+            "group": "Introduction",
+            "pages": [
+              "Web3-Functions/Introduction/Overview",
+              "Web3-Functions/Introduction/Trigger-types",
+              "Web3-Functions/Introduction/Typescript-functions",
+              "Web3-Functions/Introduction/Solidity-functions",
+              "Web3-Functions/Introduction/Automated-transactions"
+            ]
+          },
+          {
+            "group": "Security Considerations",
+            "pages": [
+              "Web3-Functions/Security-Considerations/Dedicated-msg-sender"
+            ]
+          },
+          {
+            "group": "How-To Guides",
+            "pages": [
+              {
+                "group": "Create a Web3 Functions Task",
+                "pages": [
+                  "Web3-Functions/How-To-Guides/Create-a-Web3-Functions-Task/Using-UI",
+                  "Web3-Functions/How-To-Guides/Create-a-Web3-Functions-Task/Using-Smart-Contract",
+                  "Web3-Functions/How-To-Guides/Create-a-Web3-Functions-Task/Using-the-Automate-SDK",
+                  "Web3-Functions/How-To-Guides/Create-a-Web3-Functions-Task/Using-Safe-UI"
+                ]
+              },
+              {
+                "group": "Write Typescript Functions",
+                "pages": [
+                  "Web3-Functions/How-To-Guides/Write-Typescript-functions/Event-Trigger",
+                  "Web3-Functions/How-To-Guides/Write-Typescript-functions/Private-Typescript-functions",
+                  "Web3-Functions/How-To-Guides/Write-Typescript-functions/Callbacks"
+                ]
+              },
+              "Web3-Functions/How-To-Guides/Test-deploy-Typescript-functions",
+              "Web3-Functions/How-To-Guides/Write-solidity-functions",
+              "Web3-Functions/How-To-Guides/Test-deploy-solidity-functions",
+              "Web3-Functions/How-To-Guides/Initiate-an-automated-transactions"
+            ]
+          },
+          {
+            "group": "Additional Resources",
+            "pages": [
+              "Web3-Functions/Additional-Resources/Templates-and-use-cases",
+              "Web3-Functions/Additional-Resources/Analytics-and-monitoring",
+              "Web3-Functions/Additional-Resources/Subscriptions-and-payments",
+              "Web3-Functions/Additional-Resources/Supported-networks"
+            ]
           }
         ]
       },
