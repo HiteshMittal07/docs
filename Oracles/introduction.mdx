@@ -1,3 +1,48 @@
 ---
 title: Introduction
 ---
+
+# Oracles
+
+## Overview
+
+Smart contracts operate in a very predictable environment, but they still need to access real-world information—like asset prices, weather updates, or sports scores. Getting this external data in a way that's secure, decentralized, and affordable can be a real challenge.
+
+Gelato Oracles help solve this problem by automatically providing verified on-chain data updates from several different sources. This means that smart contracts can always rely on accurate, tamper-proof real-time information without relying on centralized sources.
+
+## Understanding Gelato Oracles
+
+Gelato Oracles provide a seamless and automated way to update on-chain price data by leveraging multiple data providers. This integration enables real-time, decentralized, and tamper-proof price updates, ensuring that smart contracts always have access to accurate market data without requiring manual intervention. Gelato Oracles follow the push oracle model, where operator continuously pushes price updates and the oracle operator must pay transaction fees for each price update.
+
+### Why Use Gelato Oracles?
+
+#### Automation & Efficiency
+No need for manual price updates—Gelato Oracles automatically trigger updates only when significant price changes occur, reducing unnecessary on-chain transactions and lowering gas fees.
+
+#### Decentralized & Tamper-Proof
+By using cryptographic signatures, they ensure that the price data is secure and reliable, without relying on a centralized authority.
+
+#### Cost-Effective
+Updates occur only when needed, optimizing gas usage and overall blockchain resource consumption.
+
+#### Reliable Data Accuracy
+Integration with trusted data providers means you receive low-latency, high-accuracy price feeds essential for various blockchain applications.
+
+#### Simple Setup
+With no need to manage API credentials, you can quickly create and configure an oracle task directly on the Gelato Dashboard, simplifying integration with your smart contracts.
+
+### How It Works
+
+Our system continuously monitors price data from your chosen data provider and determines when an on-chain update is necessary. The process is streamlined into four key steps:
+
+1. **Fetching Price Data**
+   The system periodically retrieves the latest asset prices from your specified data provider, ensuring data is sourced from reliable aggregators for maximum accuracy.
+
+2. **Signature Verification & Price Validation**
+   It verifies the cryptographic signatures of the price feed to confirm authenticity.
+
+3. **Determining When to Update**
+   The system checks if the price change exceeds a predefined threshold (e.g., 0.02%). If not, no update is made, preventing unnecessary on-chain transactions.
+
+4. **Sending an On-Chain Transaction**
+   Once the conditions are met, the system automatically submits a transaction to update the on-chain oracle, ensuring smart contracts always receive accurate, real-time data.

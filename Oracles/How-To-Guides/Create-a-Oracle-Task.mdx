@@ -1,3 +1,51 @@
 ---
 title: Create a Oracle Task
 ---
+
+# Quick Start
+
+After reading this page:
+
+- You'll be guided through a step-by-step decision process to seamlessly integrate with gelato oracle by creating tasks on the Gelato app.
+
+> **Note:** Our Oracle is currently in its beta version, [Apply here](https://tally.so/r/w3f) for access.
+
+## Getting Started
+
+### 1. Create an Oracle Task
+
+Access the [Gelato Dashboard](https://app.gelato.network) and create a new Oracle task.
+
+This task will define how price data is fetched, checked for deviations, and updated on-chain.
+
+![Create Oracle Task](/images/create_oracle.png)
+
+### 2. Choose a Data Provider
+
+Gelato currently supports two primary data providers for price feeds:
+
+- **Stork**
+- **Chaos Labs** (Coming soon)
+
+Select the provider that aligns best with your data requirements and coverage needs.
+
+### 3. Select the Required Price Feeds
+
+- Review the available price feeds for each data provider.
+- Confirm that the assets or markets you need to monitor are available.
+
+### 4. Pick Your Network
+
+Refer to the [supported networks](/oracles/additional-resources/supported-networks) to ensure your target blockchain is compatible with Gelato Oracles.
+
+### 5. Configure Heartbeat and Frequency
+
+#### Heartbeat
+- Specifies how often the price feed should be updated, even when there is no significant price deviation.
+- Ensures periodic data freshness and reliability.
+
+#### Frequency & Deviation
+- Defines how frequently the system checks for price deviations (e.g., every 2 minutes).
+- If the deviation threshold you set (e.g., 0.02%) is exceeded, the Oracle task automatically updates the on-chain price feed.
+
+Following these steps will help you set up an efficient, automated Oracle task on Gelato, enabling your smart contracts to operate with the most reliable and up-to-date price information.

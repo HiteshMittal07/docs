@@ -1,3 +1,37 @@
 ---
 title: Create a VRF Task
 ---
+
+# Create a VRF Task
+
+Creating your Gelato VRF Task is a straightforward process. Here's a step-by-step guide to get you started:
+
+## 1. Gather Necessary Addresses
+
+Before you begin, make sure you have the address of your requester contract at hand. This will be essential for the deployment process. 
+
+Head over to the [VRF Quick Start guide](/vrf/how-to-guides/deploy-your-contract-inheriting-gelato-vrf) to learn how to prepare your contract for requesting randomness.
+
+## 2. Access the VRF Deployment Portal
+
+Navigate to the [Gelato app](https://app.gelato.network).
+
+## 3. Choose your VRF Type
+
+When prompted to select the VRF type, opt for "Gelato VRF". If you previously deployed a Chainlink consumer contract and wish to transition, refer to the [Migrate from Chainlink VRF](/vrf/how-to-guides/migrate-from-chainlink-vrf) section. 
+
+Or, if you already have a VRF task and want to cover all the missing events, you can set up a fallback task to ensure completeness, refer to the [Create a Fallback VRF](/vrf/how-to-guides/create-a-fallback-vrf) section.
+
+## 4. Select Deployment Network
+
+Ensure you choose the same network where both your VRF requester and receiver contracts are deployed.
+
+![Create VRF Task](/images/create_vrf.webp)
+
+## 5. Specify the Request Contract
+
+You'll be asked to provide the address of the Request Contract to which the Gelato nodes should respond. Enter the address you gathered in step 1.
+
+## 6. Launch your VRF Instance
+
+Once all details are correctly entered, go ahead and launch your Gelato VRF instance.

@@ -1,3 +1,198 @@
 ---
 title: Analytics & Monitoring
 ---
+
+
+## Task Performance Dashboard
+Gelato's Web3 Function UI offers enriched monitoring and analytics capabilities, allowing you to closely track the performance and usage statistics of your Typescript and Solidity function tasks.
+
+- **Usage Insights**: Get a clear picture of how much you've used from your Web3 function plan. Our intuitive metrics and forecast charts help you understand your current usage and predict future needs.
+
+- **Task Identification**: Quickly figure out if a task is powered by Typescript or Solidity. This feature simplifies how you view and manage your suite of Gelato Web3 functions.
+
+- **Trend Tracking**: Our updated chart design lets you track how your usage changes day-to-day, providing insights for better planning and task management.
+
+- **Plan Details**: Know exactly what you're getting with your subscription.
+
+<img src="/images/analytics_w3f.png" alt="Analytics Dashboard" />
+
+## Logs & Status
+Besides the task logs available in the UI, Gelato Web3 Functions offer a more detailed and granular monitoring system providing status and logs APIs.
+
+### Task Status URL
+Provided the ChainId and taskId, this API will return the current Task status
+
+```
+https://api.gelato.digital/tasks/web3functions/networks/{chainId}/tasks/{taskId}/status
+```
+
+For example, if your chainId, taskId are:
+
+```
+chainId: 137
+taskId: 0xdeaeee394c952d8b23c86eacc704adf7b605d89d992cec9a5fc86e4a517f053b
+```
+
+Then the URL to go to is:
+
+```
+https://api.gelato.digital/tasks/web3functions/networks/137/tasks/0xdeaeee394c952d8b23c86eacc704adf7b605d89d992cec9a5fc86e4a517f053b/status
+```
+
+For this taskId, here is the returned task information:
+
+```json
+{
+    "task":{
+        "chainId":137,               
+        "taskId": "0xdeaeee394c952d8b23c86eacc704adf7b605d89d992cec9a5fc86e4a517f053b",
+        "taskState":"CheckPending",
+        "creationDate":"2023-06-01T20:10:39.985Z",
+        "lastCheckDate":"2023-06-09T06:22:44.966Z",
+        "lastCheckMessage":"Fail to run Web3Function: Web3Function exited with code=1",
+        "lastExecDate":"2023-06-09T08:15:11.883Z",
+        "lastExecTransactionHash": "0xc2e57f5b56bf24ae77eca31fbe76ecf16cd30cb0fc5592207bb567addff62402"
+    }
+}
+```
+
+The first thing to look at is the taskState key:
+
+#### Task states:
+For the taskState key, these are the possible values:
+
+- **CheckPending**: the task is pending simulation.
+- **ExecPending**: the task is executable and is awaiting inclusion into the blockchain.
+- **WaitingForConfirmation**: the task was included into the blockchain but is still awaiting the required amount of blocks confirmations.
+- **ExecSuccess**: the task has been successfully executed.
+- **Cancelled**: the task has been canceled by the owner
+- **ExecReverted**: the task transaction has been reverted.
+
+### Task Logs URL
+Provided the ChainId and taskId, this API will return the logs in the last 24 hours.
+
+Query Parameters:
+- `limit` (optional): The number of log entries to return, ranging from 1 to 100.
+- `page` (optional): Specifies the page number of logs to fetch, ranging from 1 to 100.
+
+```
+https://api.gelato.digital/tasks/web3functions/networks/{chainId}/tasks/{taskId}/logs?limit=NrLogs&page=PageNr
+```
+
+For example, if your chainId, taskId, NrLogs and PageNr are:
+
+```
+chainId: 137
+taskId: 0xdeaeee394c952d8b23c86eacc704adf7b605d89d992cec9a5fc86e4a517f053b
+NrLogs:2
+PageNr: 1
+```
+
+Then the URL to go to is:
+
+```
+https://api.gelato.digital/tasks/web3functions/networks/137/tasks/0xdeaeee394c952d8b23c86eacc704adf7b605d89d992cec9a5fc86e4a517f053b/logs?limit=2&page=1
+```
+
+For this taskId, here is the returned task information:
+
+```json
+{
+    "logs": [
+        {
+            "date":"2023-06-09T08:43:52.404Z",
+            "state":"WaitingForConfirmation",
+            "type":"WaitingForConfirmation",
+            "message":"txHash: 0x788726ed95f2f916a47cae0c6cdfbea91e1c8e3756f91e0efc08fa501daed8f0"
+        },
+        {
+            "date":"2023-06-09T08:43:51.835Z",
+            "state":"ExecPending",
+            "type":"ExecPendingCheck",
+            "message":"Task submitted for execution",
+            "web3FunctionLogs":[
+                "Text generated: ",
+                "Chaffinches are small, colourful birds which feed on seeds and insects. They have buff-coloured breasts streaked with brown markings, bright pinkish-red faces and wings marked with white bars. In summer they breed in woodlands; in winter many move south to warmer areas.",
+                "Text generated: ",
+                "Chameleons are lizards known for their ability to change color, excellent vision and long, sticky tongues used to catch prey."
+            ]
+        }
+    ]
+}
+```
+
+## Alerts
+Web3 Functions provides an alerting service to enable you to get notified about your task executions, problems or when your balance is getting low. Alerting currently supports notifications in Telegram and Discord, with other channels on the way.
+
+### Types of notifications
+
+| Type | Description |
+|------|-------------|
+| Balance | If your task uses Gelato Balance you need to ensure that you always have enough funds deposited, otherwise your executions will stop executing until you top-up. Set a balance alert to be notified when your funds are running low - you can use our default levels or set your own threshold. |
+
+### Setting up Telegram Notifications
+You can visit your notifications area to follow the steps listed below.
+
+1. Add [GelatoWatcherBot](https://t.me/GelatoWatcherBot) to your Telegram - if you have Telegram installed you can just click on the link to do this.
+2. Enter the command `/start`
+3. The bot will show you the main alerts that you can request by entering the command.
+4. When you enter each command the bot will step you through the inputs required to finish setting up the alert.
+5. You can view the full list of commands at any time by entering `/help`
+
+#### Telegram Bot Commands
+
+| Command | Usage |
+|---------|-------|
+| `/balance` | Alerts when your Gelato Balance drops below the minimum balance threshold. The default thresholds are listed here. The bot will prompt you for the wallet address that you use to create and manage your tasks. To provide multiple addresses enter each one as a new message to the bot. If you use the same wallet address across multiple networks, you will be alerted when any of these drop below the default thresholds. If you would like to set your own threshold use the `/balance_threshold` command. |
+| `/balance_threshold` | Alerts you when your Gelato Balance drops below the threshold you set on a specific network. After entering the `/balance_threshold` command the bot will prompt you to specify the chain IDs and your threshold level. Chain IDs are listed here. For example to be alerted when your Gelato Balance drops below 0.15 ETH on mainnet you would enter `1,0.15` |
+| `/list_threshold` | List all custom and default balance thresholds of each network |
+
+### Discord DM Notifications
+In this mode you receive your alerts as DM's to your Discord handle. To activate:
+
+1. Join our [Gelato Discord server](https://discord.gg/ApbA39BKyJ)
+2. Choose from the list of commands below
+
+If you would prefer to receive alerts in a specific channel please see how to get Discord notifications in your server.
+
+#### Command
+
+| Command | Usage |
+|---------|-------|
+| `/balance-dm address` | Alerts when your Gelato Balance drops below the default threshold for the specified wallet address. The default thresholds are listed below. To provide multiple addresses enter a new command to the bot for each address. If you use the same wallet address across multiple networks, you will be alerted when any of these drop below the default thresholds. To set your own threshold use the `/balance-threshold-dm` command. |
+| `/balance-threshold-dm chain_id threshold` | Alerts you when your Gelato Balance drops below the threshold you set on a specific network. Use the `/balance-dm` command to set the address(es) that you would like to monitor. Chain IDs are listed here. For example to be alerted when your Gelato Balance drops below 0.15 ETH on mainnet you would enter `1 0.15` |
+| `/list-threshold-dm` | List all custom and default balance thresholds of each network |
+
+### Discord notifications in your own server
+1. Add our Gelato Bot to your server using this [invite link](https://discord.com/api/oauth2/authorize?client_id=1076971863904010250&permissions=2147485696&scope=bot) (you need to be admin of the server)
+2. If you want to receive notifications in a private channel, make sure to add Gelato Bot as a member in the channel where you want to receive the notification.
+3. Enter the following commands in the channel you want to receive alerts.
+
+#### Command
+
+| Command | Usage |
+|---------|-------|
+| `/balance-channel address` | Alerts when your Gelato Balance drops below the default threshold for the specified wallet address. The default thresholds are listed below. To provide multiple addresses enter a new command to the bot for each address. If you use the same wallet address across multiple networks, you will be alerted when any of these drop below the default thresholds. To set your own threshold use the `/balance-threshold-dm` command. |
+| `/balance-threshold-channel chain_id threshold` | Alerts you when your Gelato Balance drops below the threshold you set on a specific network. Use the `/balance-dm` command to set the address(es) that you would like to monitor. Chain IDs are listed here. For example to be alerted when your Gelato Balance drops below 0.15 ETH on mainnet you would enter `1 0.15` |
+| `/list-threshold-channel` | List all custom and default balance thresholds of each network |
+| `/stop-balance-channel` | Switch off all low balance alerts |
+
+### Default Thresholds
+Unless overridden these are the default levels that are used for each network.
+
+| Network | Chain ID | Default Threshold |
+|---------|----------|-------------------|
+| Ethereum | 1 | 0.05 ETH |
+| Polygon | 137 | 20 MATIC |
+| Fantom | 250 | 20 FTM |
+| Avalanche | 43114 | 0.5 AVAX |
+| BNB Chain | 56 | 0.05 BNB |
+| Optimism | 10 | 0.05 ETH |
+| Arbitrum | 42161 | 0.05 ETH |
+| Gnosis | 100 | 5 XDAI |
+| zkSync Era | 324 | |
+| Polygon zkEVM | 1101 | |
+| Base | 8453 | |
+| Linea | 59144 | |
+
+If you need more notifications or new communication channels, your feedback and suggestions are always welcome.

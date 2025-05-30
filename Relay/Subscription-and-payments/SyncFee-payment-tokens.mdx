@@ -1,3 +1,47 @@
 ---
 title: SyncFee Payment Tokens
 ---
+
+# SyncFee Payment Tokens
+
+Learn what payment tokens you can use in your transactions.
+
+When utilizing the callWithSyncFeeERC2771 or callWithSyncFee relay methods, you have the option to pay transaction fees with a token other than the native one. In addition to the native token, support is also extended to the wrapped native token, and on mainnets, the major ERC20 tokens. Please refer to the table below for the full array of supported tokens.
+
+## Mainnets
+
+| Network | Payment Tokens |
+|---------|---------------|
+| **All networks** | **NATIVE:** `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` |
+| **Arbitrum** | **WETH:** `0x82af49447d8a07e3bd95bd0d56f35241523fbab1`<br>**DAI:** `0xda10009cbd5d07dd0cecc66161fc93d7c9000da1`<br>**USDC.e:** `0xff970a61a04b1ca14834a43f5de4533ebddb5cc8`<br>**USDC:** `0xaf88d065e77c8cc2239327c5edb3a432268e5831`<br>**USDT:** `0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9`<br>**WBTC:** `0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f` |
+| **Avalanche** | **WAVAX:** `0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7`<br>**DAI.e:** `0xd586e7f844cea2f87f50152665bcbc2c279d8d70`<br>**USDC.e:** `0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664`<br>**USDC:** `0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e`<br>**USDT.e:** `0xc7198437980c041c805a1edcba50c1ce5db95118`<br>**USDT:** `0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7`<br>**WBTC.e:** `0x50b7545627a5162f82a992c33b87adc75187b218`<br>**WETH.e:** `0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab` |
+| **Base** | **WETH:** `0x4200000000000000000000000000000000000006`<br>**USDC:** `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`<br>**USDbC:** `0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca` |
+| **BNB** | **WBNB:** `0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c`<br>**BUSD:** `0xe9e7cea3dedca5984780bafc599bd69add087d56`<br>**BSC-USD:** `0x55d398326f99059ff775485246999027b3197955`<br>**HERO:** `0xd40bedb44c081d2935eeba6ef5a3c8a31a1bbe13`<br>**CAKE:** `0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82`<br>**BTCB:** `0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c`<br>**USDC:** `0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d` |
+| **Ethereum** | **WETH:** `0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2`<br>**DAI:** `0x6b175474e89094c44da98b954eedeac495271d0f`<br>**USDC:** `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48`<br>**USDT:** `0xdac17f958d2ee523a2206206994597c13d831ec7`<br>**WBTC:** `0x2260fac5e5542a773aa44fbcfedf7c193bc2c599` |
+| **Gnosis** | **WXDAI:** `0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d`<br>**GNO:** `0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb`<br>**USDC:** `0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83`<br>**USDT:** `0x4ECaBa5870353805a9F068101A40E0f32ed605C6`<br>**WETH:** `0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1` |
+| **Linea** | **WETH:** `0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f` |
+| **Optimism** | **WETH:** `0x4200000000000000000000000000000000000006`<br>**DAI:** `0xda10009cbd5d07dd0cecc66161fc93d7c9000da1`<br>**USDC.e:** `0x7f5c764cbc14f9669b88837ca1490cca17c31607`<br>**USDC:** `0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85`<br>**USDT:** `0x94b008aa00579c1307b0ef2c499ad98a8ce58e58`<br>**WBTC:** `0x68f180fcce6836688e9084f035309e29bf0a2095`<br>**SNX:** `0x8700daec35af8ff88c16bdf0418774cb3d7599b4`<br>**AELIN:** `0x61baadcf22d2565b0f471b291c475db5555e0b76`<br>**FRAX:** `0x2e3d870790dc77a83dd1d18184acc7439a53f475` |
+| **Polygon** | **WMATIC:** `0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270`<br>**DAI:** `0x8f3cf7ad23cd3cadbd9735aff958023239c6a063`<br>**USDC.e:** `0x2791bca1f2de4661ed88a30c99a7a9449aa84174`<br>**USDC:** `0x3c499c542cef5e3811e1192ce70d8cc03d5c3359`<br>**USDT:** `0xc2132d05d31c914a87c6611c10748aeb04b58e8f`<br>**WBTC:** `0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6`<br>**WETH:** `0x7ceb23fd6bc0add59e62ac25578270cff1b9f619` |
+| **Polygon zkEVM** | **WETH:** `0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9`<br>**USDC:** `0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035` |
+| **zkSync Era** | **WETH:** `0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91`<br>**USDC:** `0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4` |
+| **Zora** | **WETH:** `0x4200000000000000000000000000000000000006` |
+| **Shibarium** | **WBONE:** `0xC76F4c819D820369Fb2d7C1531aB3Bb18e6fE8d8` |
+
+## Testnets
+
+| Network | Payment Tokens |
+|---------|---------------|
+| **All networks** | **NATIVE:** `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` |
+| **Amoy** | **NATIVE:** `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE`<br>**WMATIC:** `0x22f92e5a6219bEf9Aa445EBAfBeB498d2EAdBF01` |
+| **Sepolia** | **WETH:** `0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9` |
+| **Gelato OP Testnet** | **WETH:** `0x4200000000000000000000000000000000000006` |
+| **Astar zKatana** | **WETH:** `0x22f92e5a6219bEf9Aa445EBAfBeB498d2EAdBF01` |
+| **Tangible Unreal** | **WETH:** `0x22f92e5a6219bEf9Aa445EBAfBeB498d2EAdBF01` |
+| **Arbitrum Goerli** | **WETH:** `0xEe01c0CD76354C383B8c7B4e65EA88D00B06f36f` |
+| **Base Goelri** | **WETH:** `0x44D627f900da8AdaC7561bD73aA745F132450798` |
+| **Goerli** | **WETH:** `0x44D627f900da8AdaC7561bD73aA745F132450798` |
+| **Chiado** | **WXDAI:** `0x18c8a7ec7897177E4529065a7E7B0878358B3BfF` |
+| **Linea Goerli** | **WETH:** `0x2C1b868d6596a18e32E61B901E4060C872647b6C` |
+| **Optimism Goerli** | **WETH:** `0x4200000000000000000000000000000000000006` |
+| **Polygon zkEVM Goerli** | **WETH:** `0xeE589e91401066068AF129B0005aC3EF69E3fdB4` |
+| **zkSync Era Goerli** | **WETH:** `0x20b28B1e4665FFf290650586ad76E977EAb90c5D` |

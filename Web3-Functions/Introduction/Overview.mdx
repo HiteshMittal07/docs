@@ -1,3 +1,43 @@
 ---
 title: Overview
 ---
+
+# Understanding Web3 Functions
+
+## Determining your Needs
+
+### Off-chain Data or Computation?
+Sometimes, automation tasks require data that isn't readily available on the blockchain, or they might need computations that are better performed off-chain. In such cases, Typescript Functions should be the choice.
+
+### All Checks On-chain?
+If all the conditions necessary for your automation task can be directly verified on the blockchain, you have the option to select between Typescript Functions, Solidity Functions & Automated Transactions.
+
+## Implementation path
+
+| Step | Description |
+|------|-------------|
+| How you want to trigger your run? | Start by deciding on the type of trigger you want to use. (Time, event, or every block) |
+| What to run? | - Typescript Function<br/>- Solidity Function<br/>- Transaction |
+| Task Creation | Create a Web3 Function task to allow the execution of typescript, solidity or transaction |
+| Finalize & Monitor | Once you've defined your function ensure you monitor its execution to confirm that it works as expected. Make any necessary adjustments. |
+
+## Core Features of Web3 Functions
+
+Main features of Web3 Functions include Typescript Functions, Solidity Functions & Automated Transactions.
+
+Before jumping into the core features of the Web3 Functions, it is highly recommended that you first learn how you'd like to trigger your run. To learn more:
+
+### Trigger Types
+Learn more about each of the 3 actions that your trigger can run:
+- [Typescript Function](/Web3-Functions/Introduction/Typescript-functions)
+- [Solidity Function](/Web3-Functions/Introduction/Solidity-functions)
+- [Automated Transactions](/Web3-Functions/Introduction/Automated-transactions)
+
+## Pre-Requisite of Target Smart Contract
+
+Smart contract functions in the target contract that can be automated should follow these properties:
+
+- They need to be functions that are usually called by the development team or external keepers, not "user facing" functions called by users directly
+- They need to be either public or external
+- They do not have access restrictions like an onlyOwner modifier, unless the user's dedicated msg.sender address is whitelisted through the proxy module
+- They do not require msg.sender to be tx.origin

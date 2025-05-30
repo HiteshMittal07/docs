@@ -1,3 +1,55 @@
 ---
 title: Migrate from Chainlink VRF
 ---
+
+# Migrating from Chainlink VRF
+
+Quick and simple migration from Chainlink VRF!
+
+Already using Chainlink VRF? Here's how you can quickly and easily migrate to GelatoVRF.
+
+## Understand the Implications
+
+While this migration option is available, be aware that it can lead to higher gas costs and added development intricacies. We advise this route only if:
+
+- You've already deployed a Chainlink VRF Consumer.
+- Your Chainlink VRF Consumer has the capability to update its Coordinator address.
+
+Otherwise, for new integrations, we recommend directly implementing the Gelato VRF.
+
+## Initiate Migration
+
+If you're set on migrating an existing Chainlink VRF Consumer:
+
+1. Begin by creating your VRF task. In the "VRF Type" selection window, opt for "VRF Compatibility".
+
+2. Choose the blockchain network for deployment.
+
+![Chainlink VRF Network Selection](/images/chainlink_vrf_1.avif)
+
+3. You will then be asked to deploy your Adapter contract:
+
+![Chainlink VRF Adapter Deployment](/images/chainlink_vrf_2.png)
+
+Once deployed, the app will show you the address to which the adapter contract was deployed. You now need to replace the old Coordinator address in your contract by this address.
+
+## Updating the VRF Coordinator Address
+
+Here's a brief example of how you might implement such a function to update the vrfCoordinator in your Consumer Contract:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
+
+contract VRFConsumer is VRFConsumerBase {
+    ...
+    function setVRFCoordinator(address _vrfCoordinator) external onlyOwner {
+        vrfCoordinator = _vrfCoordinator;
+    }
+    ...
+}
+```
+
+To facilitate the update of the Chainlink VRF Coordinator address in your smart contracts, you can reference the function from this [deployed contract on Polygon](https://polygonscan.com/address/your-contract-address).

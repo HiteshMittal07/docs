@@ -1,3 +1,43 @@
 ---
 title: Overview
 ---
+
+# Subscriptions and Payments
+
+How can you pay for your relayed transactions?
+
+## Relay Subscriptions
+
+Gelato Relay Subscription Plans are designed to scale effectively and efficiently to fit your needs, whether they are large or small. Below, you'll find the updated pricing details for each plan, along with explanations for each pricing component.
+
+### Autoscale Feature
+
+To prevent service interruption upon exceeding plan limits, you can enable the autoscale feature. This allows your plan to automatically accommodate additional requests beyond your set limits, billed at the specified autoscale rates.
+
+If the autoscale feature is deactivated, all requests that exceed either monthly or throughput limits included in your Relay subscription plan, will be rejected.
+
+![Relay Subscriptions](../../images/subscriptions_relay.avif)
+
+## Payment Methods
+
+Payments for Relay subscription plans are processed through 1Balance. When transactions are conducted using sponsoredCall or sponsoredCallERC2771, the associated gas costs are also settled via 1Balance. However, if you utilize callWithSyncFee or callWithSyncFeeERC2771, your transaction gas costs should be covered by an on-chain transfer. For further details, please see the information below.
+
+### 1Balance
+
+**Supported SDK methods:** see [sponsoredCall](/relay/non-erc2771/sponsored-call), [sponsoredCallERC2771](/relay/erc2771-recommended/sponsored-call-erc2771)
+
+Gelato 1Balance is a new flexible and bespoke payment system built from the ground up exclusively for Gelato customers. Gelato 1Balance allows for customers to deposit on any supported, whilst using that balance to cover their relay costs regardless of target chain.
+
+#### Networks & Tokens supported
+- **Testnets:** Deposit sETH on Sepolia to cover transactions across all supported Testnets.
+- **Mainnets:** Deposit USDC on Polygon to cover transactions across all supported Mainnets.
+
+For more information, please see [1Balance](/1balance).
+
+### SyncFee
+
+**Supported SDK methods:** see [callWithSyncFee](/relay/non-erc2771/call-with-sync-fee), [callWithSyncFeeERC2771](/relay/erc2771-recommended/call-with-sync-fee-erc2771)
+
+SyncFee is the simplest way to pay, but it delegates all security (reentrancy/replay protection etc.) and payment logic to the target smart contract. You can use ERC-2771 to achieve out-of-the-box security and authentication. Relay costs are covered in either native or ERC-20 tokens and they are paid synchronously during the relay call.
+
+Please visit [SyncFee Payment Tokens](/relay/payment-tokens) for the full list of supported tokens per network.

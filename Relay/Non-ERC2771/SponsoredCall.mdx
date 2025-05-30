@@ -1,3 +1,153 @@
 ---
 title: SponsoredCall
 ---
+
+# SponsoredCall
+
+Permissionless sponsored transactions
+
+After reading this page:
+
+- You'll know how to use the SponsoredCall SDK method. This uses the 1Balance payment method, allowing you to sponsor some/all of your user's gas costs.
+- You'll see some code which will help you send a relay request within minutes.
+
+> **Important:** Please proceed to our [Security Considerations](/relay/security) page and read it thoroughly before advancing with your implementation. It is crucial to understand all potential security risks and measures to mitigate them.
+
+> **Note:** The nature of sponsoredCall is permissionless and does not enforce any security. Target contracts should not whitelist the calling contract as an authorized msg.sender. The contract address is subject to change without further notice.
+
+## Overview
+
+sponsoredCall method utilises authentication via a sponsor API key to sponsor gasless transactions for your users securely. The payment method is Gelato 1Balance.
+
+## SDK method: sponsoredCall
+
+```typescript
+const sponsoredCall = async (
+  request: SponsoredCallRequest,
+  sponsorApiKey: string,
+  options?: RelayRequestOptions
+): Promise<RelayResponse>
+```
+
+### Arguments
+- `request`: this is the request body used to send a request.
+- `sponsorApiKey`: an API key used to authenticate your sponsorship.
+- `options`: RelayRequestOptions is an optional request object.
+
+### Return Object: RelayResponse
+```typescript
+type RelayResponse = {
+  taskId: string;
+};
+```
+- `taskId`: your unique relay task ID which can be used for tracking your request.
+
+### Optional Parameters
+```typescript
+type RelayRequestOptions = {
+  gasLimit?: BigNumberish;
+  retries?: number;
+};
+```
+- `gasLimit`: the gas limit of the relay call. This effectively sets an upper price limit for the relay call.
+
+> **Note:** If you are using your own custom gas limit, please add a 150k gas buffer on top of the expected gas usage for the transaction. This is for the Gelato Relay execution overhead, and adding this buffer reduces your chance of the task cancelling before it is executed on-chain.
+
+> **Note:** If your contract has any hardcoded requirements about gas usage, please always explicitly pass the gasLimit to the SDK/API, as Gelato will not know what hardcoded gas expectations your contract has. Otherwise, your relay requests might not be executable.
+
+- `retries`: the number of retries that Gelato should attempt before discarding this relay call. This can be useful if the state of the target contract is not fully known and such reverts can not be definitively avoided.
+
+## Using Safe smart contract wallets for sponsoredCall
+
+If you need to dispatch transactions from Safe smart contract wallets using Gelato Relay via sponsoredCall, you can opt to activate Safe-enabled transactions in your Relay Dapp configuration.
+
+![Safe Non-ERC2771 Configuration](../../images/safe_nonerc2771.avif)
+
+### Allow sponsored transactions from Safes
+
+Usually when submitting Gelato Relay transactions that originate from Safe smart contract wallets, the Safe wallet address is specified in the target field of the Relay API request, whereas both the actual target contract address and its calldata are encoded into the execTransaction payload. By activating Safe-enabled transactions - accomplished by checking the "Allow sponsored transactions from Safes" box - Gelato Relay will validate your Safe smart contract and decode the target contract address and function selector from the execTransaction calldata. It will then apply your pre-configured Relay Dapp rules to these values, rather than to the values given in the Relay request.
+
+If your intention is to deploy Safe smart contract wallets prior to their usage, be sure to whitelist the multicall contract address in your Relay Dapp. This contract is typically invoked when you deploy a Safe smart contract wallet before it can be used for the first time.
+
+## Sending a Request
+
+### Request Body
+```typescript
+const request = {
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+};
+```
+
+- `chainId`: the chain ID of the chain where the target smart contract is deployed.
+- `target`: the address of the target smart contract.
+- `data`: encoded payload data (usually a function selector plus the required arguments) used to call the required target address.
+
+## Example Code
+
+Since sponsoredCall assumes you have your own security logic built in (i.e. replay and re-entrancy protection), you can go ahead and generate the payload for your function call and populate a request object.
+
+### 1. Import GelatoRelaySDK into your front-end .js project
+
+```typescript
+import { GelatoRelay, SponsoredCallRequest } from "@gelatonetwork/relay-sdk";
+const relay = new GelatoRelay();
+```
+
+### 2. Deploy a smart contract
+
+This is an example using Gelato's SimpleCounter.sol which is deployed on Goerli and Polygon.
+
+```solidity
+pragma solidity 0.8.17;
+
+contract SimpleCounter {
+    uint256 public counter;
+
+    event IncrementCounter(uint256 newCounterValue, address msgSender);
+
+    // `increment` is the target function to call.
+    // This function increments a counter variable by 1
+    // IMPORTANT: with `sponsoredCall` you need to implement 
+    // your own smart contract security measures, as this 
+    // function can be called by any third party and not only by 
+    // Gelato Relay. If not done properly, funds kept in this
+    // smart contract can be stolen.
+    function increment() external {
+        counter++;
+        emit IncrementCounter(counter, msg.sender);
+    }
+}
+```
+
+### 3. Generate a payload for your target contract
+
+```typescript
+// set up target address and function signature abi
+const counter = "0x763D37aB388C5cdd2Fb0849d6275802F959fbF30"; 
+const abi = ["function increment()"];
+
+// generate payload using front-end provider such as MetaMask
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = provider.getSigner();
+
+const contract = new ethers.Contract(counterAddress, abi, signer);
+const { data } = await contract.increment.populateTransaction();
+```
+
+### 4. Send the payload to Gelato
+
+```typescript
+// Populate a relay request
+const request: SponsoredCallRequest = {
+  chainId: (await provider.getNetwork()).chainId,
+  target: counter,
+  data: data,
+};
+
+// Without a specific API key, the relay request will fail! 
+// Go to https://relay.gelato.network to get a testnet API key with 1Balance.
+// Send the relay request using Gelato Relay!
+const relayResponse = await relay.sponsoredCall(request, apiKey);
+```

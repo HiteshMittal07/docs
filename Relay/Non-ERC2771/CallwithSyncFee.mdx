@@ -1,3 +1,250 @@
 ---
-title: CallwithSyncFee
+title: CallWithSyncFee
 ---
+
+# CallWithSyncFee
+
+Permissionless transactions with on-chain payments
+
+After reading this page:
+
+- You'll know how to use the callWithSyncFee SDK method, using the syncFee payment method.
+- You'll see some code which will help you send a relay request within minutes.
+- You'll learn how to pay for transactions using the provided values for fee, feeToken and feeCollector.
+
+> **Important:** Please proceed to our [Security Considerations](/relay/security) page and read it thoroughly before advancing with your implementation. It is crucial to understand all potential security risks and measures to mitigate them.
+
+## Overview
+
+The callWithSyncFee method uses the syncFee payment method.
+
+## Paying for Transactions
+
+When using callWithSyncFee relay method the target contract assumes responsibility for transferring the fee to Gelato's fee collector during transaction execution. For this, the target contract needs to know:
+
+- fee: the transfer amount
+- feeToken: the token to be transferred
+- feeCollector: the destination address for the fee
+
+Fortunately, Gelato provides some useful tools within the Relay Context Contracts:
+
+1. By inheriting the GelatoRelayContext contract in your target contract, you have the ability to transfer the fee through one of two straightforward methods: _transferRelayFee() or _transferRelayFeeCapped(uint256 maxFee). In either case, the inherited contract takes care of decoding the fee, feeToken, and feeCollector behind the scenes.
+   - The Gelato Relay backend simplifies the process by automatically calculating the fee for you, using Gelato's Fee Oracle to perform the calculations in the background.
+
+2. Alternatively, you may choose to inherit the GelatoRelayFeeCollector contract. With this approach, Gelato only decodes the feeCollector. You must provide the fee and feeToken on-chain, either by hardcoding them (which is not recommended) or embedding them within the payload to be executed. The suggested way to handle this is to calculate the fee with Gelato's Fee Oracle.
+
+### Setting maxFee for Your Transaction
+
+Setting a maximum fee, or maxFee, for your transactions is strongly advised. This practice enables you to ensure that transaction costs remain below a specific limit. The method _transferRelayFeeCapped(uint256 maxFee) in the GelatoRelayContext contract provides a convenient way to set the maxFee easily.
+
+If you are utilizing the GelatoRelayFeeCollector contract, the recommended way to pass the maxFee is by calculating the fee with Gelato's Fee Oracle, which is accessible in the relay-sdk. The getEstimatedFee() method is provided to facilitate this calculation.
+
+## SDK method: callWithSyncFee
+
+```typescript
+const callWithSyncFee = async (
+  request: CallWithSyncFeeRequest,
+  options?: RelayRequestOptions,
+  apiKey?: string
+): Promise<RelayResponse>
+```
+
+### Arguments
+- `request`: this is the request body used to send a request.
+- `options`: RelayRequestOptions is an optional object.
+- `apiKey`: this is an optional API key that links your request to your Gelato Relay account. As this pertains to the syncFee payment method, transaction costs won't be deducted from your 1Balance account. By using the API key, you can benefit from increased rate limits of your Gelato Relay account.
+
+### Return Object: RelayResponse
+```typescript
+type RelayResponse = {
+  taskId: string;
+};
+```
+- `taskId`: your unique relay task ID which can be used for tracking your request.
+
+### Optional Parameters
+```typescript
+type RelayRequestOptions = {
+  gasLimit?: BigNumberish;
+  retries?: number;
+};
+```
+- `gasLimit`: the gas limit of the relay call. This effectively sets an upper price limit for the relay call.
+
+> **Note:** If you are using your own custom gas limit, please add a 150k gas buffer on top of the expected gas usage for the transaction. This is for the Gelato Relay execution overhead, and adding this buffer reduces your chance of the task cancelling before it is executed on-chain.
+
+> **Note:** If your contract has any hardcoded requirements about gas usage, please always explicitly pass the gasLimit to the SDK/API, as Gelato will not know what hardcoded gas expectations your contract has. Otherwise, your relay requests might not be executable.
+
+- `retries`: the number of retries that Gelato should attempt before discarding this relay call. This can be useful if the state of the target contract is not fully known and such reverts can not be definitively avoided.
+
+## Sending a Request
+
+### Request Body
+```typescript
+const request = {
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+  isRelayContext?: boolean;
+  feeToken: string;
+};
+```
+
+- `chainId`: the chain ID of the chain where the target smart contract is deployed.
+- `target`: the address of the target smart contract.
+- `data`: encoded payload data (usually a function selector plus the required arguments) used to call the required target address.
+- `isRelayContext`: an optional boolean (default: true) denoting what data you would prefer appended to the end of the calldata.
+  - If set to true (default), Gelato Relay will append the feeCollector address, the feeToken address, and the uint256 fee to the calldata. This requires the target contract to inherit the GelatoRelayContext contract.
+  - If set to false, Gelato Relay will only append the feeCollector address to the calldata. In this case the contract to be inherit by the target contract is the GelatoRelayFeeCollector.
+- `feeToken`: the address of the token that is to be used for payment. Please visit [SyncFee Payment Tokens](/relay/payment-tokens) for the full list of supported payment tokens per network.
+
+## Example Code (GelatoRelayContext)
+
+### 1. Deploy a GelatoRelayContext compatible contract
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
+
+import {
+    GelatoRelayContext
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+
+// Inheriting GelatoRelayContext gives access to:
+// 1. _getFeeCollector(): returns the address of Gelato's feeCollector
+// 2. _getFeeToken(): returns the address of the fee token
+// 3. _getFee(): returns the fee to pay
+// 4. _transferRelayFee(): transfers the required fee to Gelato's feeCollector.abi
+// 5. _transferRelayFeeCapped(uint256 maxFee): transfers the fee to Gelato
+//    only if fee < maxFee
+// 6. _getMsgData(): returns the original msg.data without appended information
+// 7. onlyGelatoRelay modifier: allows only Gelato Relay's smart contract
+//    to call the function
+contract CounterRelayContext is GelatoRelayContext {
+    using Address for address payable;
+
+    uint256 public counter;
+
+    event IncrementCounter(uint256 newCounterValue);
+
+    // `increment` is the target function to call.
+    // This function increments a counter variable by 1
+    // IMPORTANT: with `callWithSyncFee` you need to implement 
+    // your own smart contract security measures, as this 
+    // function can be called by any third party and not only by 
+    // Gelato Relay. If not done properly, funds kept in this
+    // smart contract can be stolen.
+    function increment() external onlyGelatoRelay {
+        // Remember to autheticate your call since you are not using ERC-2771
+        // _yourAuthenticationLogic()
+
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        _transferRelayFee();
+
+        counter++;
+
+        emit IncrementCounter(counter);
+    }
+
+    // `incrementFeeCapped` is the target function to call.
+    // This function uses `_transferRelayFeeCapped` method to ensure 
+    // better control of gas fees. If gas fees are above the maxFee value 
+    // the transaction will not be executed.
+    // This function increments a counter variable by 1
+    // IMPORTANT: with `callWithSyncFee` you need to implement 
+    // your own smart contract security measures, as this 
+    // function can be called by any third party and not only by 
+    // Gelato Relay. If not done properly, funds kept in this
+    // smart contract can be stolen.
+    function incrementFeeCapped(uint256 maxFee) external onlyGelatoRelay {
+        // Remember to autheticate your call since you are not using ERC-2771
+        // _yourAuthenticationLogic()
+
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+       
+        _transferRelayFeeCapped(maxFee);
+
+        counter++;
+
+        emit IncrementCounter(counter);
+    }
+}
+```
+
+### 2. Import GelatoRelaySDK into your front-end .js project
+
+```typescript
+import { GelatoRelay, CallWithSyncFeeRequest } from "@gelatonetwork/relay-sdk";
+const relay = new GelatoRelay();
+```
+
+### 3. Send the payload to Gelato
+
+```typescript
+// set up target address and function signature abi
+const counter = "<your counter contract address>"; 
+const abi = ["function increment()"];
+
+// generate payload using front-end provider such as MetaMask
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = provider.getSigner();
+
+// address of the token to pay fees
+const feeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+
+// instantiate the target contract object
+const contract = new ethers.Contract(counterAddress, abi, signer);
+
+// example callig the increment() method
+const { data } = await contract.populateTransaction.increment();
+
+// populate the relay SDK request body
+const request: CallWithSyncFeeRequest = {
+  chainId: (await provider.getNetwork()).chainId,
+  target: counter,
+  data: data,
+  feeToken: feeToken,
+  isRelayContext: true,
+};
+  
+// send relayRequest to Gelato Relay API
+const relayResponse = await relay.callWithSyncFee(request);
+
+// -----------------------------------------------------------------
+// the following is an alternative example using Gelato Fee Oracle, 
+// setting maxFee, and calling the incrementFeeCapped(maxFee) method
+
+// retrieve the estimate fee from the Gelato 
+const fee = await relay.getEstimatedFee(
+  (await provider.getNetwork()).chainId,
+  feeToken,
+  gasLimit,
+  false,
+)
+
+const maxFee = fee * 2 // you can use 2x or 3x to set your maxFee
+
+// example calling the incrementFeeCapped(maxFee) method
+const { dataMaxFee } = await contract.incrementFeeCapped.populateTransaction(maxFee);
+
+// populate the relay SDK request body
+const requestMaxFee: CallWithSyncFeeRequest = {
+  chainId: (await provider.getNetwork()).chainId,
+  target: counter,
+  data: dataMaxFee,
+  feeToken: feeToken,
+  isRelayContext: true,
+};
+  
+// send relayRequest to Gelato Relay API
+const relayResponse = await relay.callWithSyncFee(requestMaxFee);
+```

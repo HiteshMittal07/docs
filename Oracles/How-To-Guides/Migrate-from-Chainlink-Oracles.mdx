@@ -1,3 +1,57 @@
 ---
 title: Migrate from Chainlink Oracles
 ---
+
+# Migrating from Chainlink Oracles
+
+Already using Chainlink Oracles? Here's how you can quickly and easily migrate to Gelato Oracles.
+
+## Understand the Implications
+
+While this migration option is available, be aware that it can lead to higher gas costs and added development intricacies. We advise this route only if:
+
+- You've already deployed a Chainlink Oracle Consumer.
+- Your Chainlink Oracle Consumer has the capability to update its Aggregator address.
+
+Otherwise, for new integrations, we recommend directly implementing the Gelato Oracles.
+
+## Initiate Migration
+
+If you're set on migrating an existing Chainlink Oracle Consumer:
+
+1. Begin by creating your Oracle task following the steps in the [Quick Start guide](/oracles/how-to-guides/create-a-oracle-task). In the final step, make sure to select Chainlink Compatibility Mode.
+
+![Chainlink Oracle Compatibility Mode](/images/chainlink_oracle_1.png)
+
+2. You will then be asked to deploy your Adapter contract:
+
+![Chainlink Oracle Adapter Deployment](/images/chainlink_oracle_2.png)
+
+Once deployed, the app will show you the address to which the adapter contract was deployed. You now need to replace the old Aggregator address in your contract by this address.
+
+## Updating the Oracle Aggregator Address
+
+Here's a brief example of how you might implement such a function to update the aggregator in your Consumer Contract:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
+
+import {
+    AggregatorV3Interface
+} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
+contract ChainlinkCompatibleContract {
+    AggregatorV3Interface internal dataFeed;
+    address public owner;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
+    }
+
+    function setAggregator(address _aggregator) public onlyOwner {
+        dataFeed = AggregatorV3Interface(_aggregator);
+    }
+}
+```

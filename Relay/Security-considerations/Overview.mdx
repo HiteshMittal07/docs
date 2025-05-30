@@ -1,3 +1,191 @@
 ---
 title: Overview
 ---
+
+# Security Considerations
+
+Essential reading to safeguard your contracts
+
+After reading this page:
+
+- You will understand the security risks associated with using a Relayer.
+- You will learn strategies for safeguarding your contracts effectively.
+- You will be exposed to an example of a contract that is susceptible to exploitation.
+
+## Potential Security Risk in Relayer Authentication
+
+A relayer is responsible for dispatching a transaction to an external or public contract method. Given the public nature of this method, it is accessible for invocation by any third party. So, how can we ascertain the legitimacy of the party executing this method?
+
+In certain implementations, we have observed an approach that utilizes a mechanism to ensure that solely the Gelato Relay is authorized to call the contract. This mechanism employs a modifier, known as onlyGelatoRelay. This modifier verifies that the transaction's msg.sender is the GelatoRelay contract. However, it's crucial to note that this form of validation does not offer protection from potential malevolent third parties leveraging the relayer to compromise your contract.
+
+🚨 **Additional authentication is required to safeguard your contracts!**
+
+To ensure robust security for your contracts, additional layers of authentication are indispensable. We urge you to adhere to our tried and tested security best practices. These guidelines have been designed to efficiently manage and mitigate security risks. Let's dive in!
+
+## ✅ Battle Tested Best Practice
+
+The most prevalent method to authenticate users within the web3 ecosystem relies on the ERC-2771 standard and EIP-712 signature. Gelato offers convenient helper contracts that facilitate the verification and decoding of the user's signature, thereby ensuring that the user initiating the transaction is indeed legitimate.
+
+Gelato's SDK provides two methods that implement the ERC-2771 standard behind the scenes:
+
+- [sponsoredCallERC2771](/relay/sdk/sponsoredCallERC2771)
+- [callWithSyncFeeERC2771](/relay/sdk/callWithSyncFeeERC2771)
+
+In both instances, Gelato offers built-in methods to decode the msg.sender and msg.data, substituting these with _msgSender() and _msgData(), respectively.
+
+We strongly advocate for the use of Gelato's built-in ERC-2771 user signature verification contracts, coupled with the onlyGelatoRelay modifier. This combination offers a robust level of security and helps safeguard your contracts against potential threats.
+
+## Addressing the Risk of Relayer Fee Payment
+
+Gelato Relayer can be used in various ways. Among these, two specific methods exist: callWithSyncFeeERC2771 and callWithSyncFee. In these, the target contract is responsible for transferring the fees to the feeCollector.
+
+Gelato provides Relay Context Contracts, which include helper methods that simplify the extraction process for feeCollector, fee, and feeToken. The fees are transferred by invoking the _transferRelayFee() method.
+
+```solidity
+// DANGER! Only use with onlyGelatoRelay or `_isGelatoRelay` before transferring
+function _transferRelayFee() internal {
+    _getFeeToken().transfer(_getFeeCollector(), _getFee());
+}
+```
+
+The following code sample illustrates how feeCollector is extracted from the callData:
+
+```solidity
+uint256 constant _FEE_COLLECTOR_START = 72; // offset: address + address + uint256
+
+// WARNING: Do not use this free fn by itself, always inherit GelatoRelayContext
+// solhint-disable-next-line func-visibility, private-vars-leading-underscore
+function _getFeeCollectorRelayContext() pure returns (address feeCollector) {
+    assembly {
+        feeCollector := shr(
+            96,
+            calldataload(sub(calldatasize(), _FEE_COLLECTOR_START))
+        )
+    }
+}
+```
+
+This snippet lacks a built-in security check or protective measure; it simply extracts the feeCollector from the callData.
+
+🚨 **Without additional safeguards, this implementation is susceptible to Miner Extractable Value (MEV) front running.**
+
+Therefore, any external actor could potentially call the target contract and encode their addresses as feeCollector.
+
+Given these risks, it is absolutely essential to implement the following security best practices. 👇🏻
+
+## ✅ Battle Tested Best Practice
+
+Alongside implementing the Relay Context Contracts, it's crucial to verify that the msg.sender of the transaction is the GelatoRelay address before executing fee transfers.
+
+```solidity
+// Using onlyGelatoRelay modifier
+function targetMethod() external onlyGelatoRelay {
+    ...
+    // If you are not using ERC-2771 remember to authenticate all 
+    // on-chain relay calls to your contract's methods even if you 
+    // identify GelatoRelay as the msg.sender
+    // The following pseudocode signifies an authentication procedure
+    _yourAuthenticationLogic();
+
+    // Payment to Gelato
+    _transferRelayFee();
+    ...
+}
+
+// Or alternatively using _isGelatoRelay(address _forwarder) method
+function targetMethod() external {
+    ...
+    // If you are not using ERC-2771 remember to authenticate all 
+    // on-chain relay calls to your contract's methods even if you 
+    // identify GelatoRelay as the msg.sender
+    // The following pseudocode signifies an authentication procedure
+    _yourAuthenticationLogic();
+        
+    if (_isGelatoRelay(msg.sender)) {
+        // Payment to Gelato
+        _transferRelayFee();
+    }
+    ...
+}
+```
+
+## ✅ Additional Security Layer
+
+The aforementioned best practice ensures protection from front-running and unauthorized third-party fund drains. However, if your use case demands heightened control over the fees, you can further minimize risk by introducing a maxFee into your function using the method _transferRelayFeeCapped(uint256 maxFee).
+
+```solidity
+// Using onlyGelatoRelay modifier
+function targetMethod() external onlyGelatoRelay {
+    ...
+    // If you are not using ERC-2771 remember to authenticate all 
+    // on-chain relay calls to your contract's methods even if you 
+    // identify GelatoRelay as the msg.sender
+    // The following pseudocode signifies an authentication procedure
+    _yourAuthenticationLogic();
+
+    // Payment to Gelato
+    _transferRelayFeeCapped(maxFee);
+    ...
+}
+
+// Or alternatively using _isGelatoRelay(address _forwarder) method
+function targetMethod() external {
+    ...
+    // If you are not using ERC-2771 remember to authenticate all 
+    // on-chain relay calls to your contract's methods even if you 
+    // identify GelatoRelay as the msg.sender
+    // The following pseudocode signifies an authentication procedure
+    _yourAuthenticationLogic();
+        
+    if (_isGelatoRelay(msg.sender)) {
+        // Payment to Gelato
+        _transferRelayFeeCapped(maxFee);
+    }
+    ...
+}
+```
+
+For more detailed information on utilizing _transferRelayFeeCapped(uint256 maxFee), please consult our comprehensive guide [here](/relay/security/fee-capping).
+
+## Example of a Poor and Insecure Implementation
+
+The VeryDummyWallet in the following example gives the impression of being a well-constructed implementation of the Gelato Relay, since it:
+
+- Inherits the GelatoRelayContext
+- Implements the onlyGelatoRelay modifier
+- Transfers the fees using the built-in method _transferRelayFee()
+
+However, this contract has a critical flaw: any user can create a request by calling the Gelato Relay and passing any "to" address to the sendToFriend() method. This contract does not implement any form of user authentication or authorization, making it susceptible to exploitation.
+
+🚨🚨🚨 **WARNING: THIS IS A BAD EXAMPLE. DO NOT REPLICATE** 🚨🚨🚨
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
+
+import {
+    GelatoRelayContext
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {
+    SafeERC20
+} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+contract VeryDummyWallet is GelatoRelayContext {
+    // `sendToFriend` is the target function to call
+    // this function uses this contract's mock ERC-20 balance to send
+    // an _amount of tokens to the _to address.
+    function sendToFriend(
+        address _token,
+        address _to,
+        uint256 _amount
+    ) external onlyGelatoRelay {
+        // payment to Gelato
+        _transferRelayFee();
+
+        // transfer of ERC-20 tokens
+        SafeERC20.safeTransfer(IERC20(_token), _to, _amount);
+    }
+}
+```

@@ -1,3 +1,206 @@
 ---
 title: Using the Automate SDK
 ---
+
+# Using the Automate SDK
+
+The SDK is suitable when you need to integrate task creation into your development environment or automated scripts. It's also useful for complex setups that require conditional logic before task submission.
+
+Use the automate-sdk to easily create a new task:
+
+```bash
+yarn install @gelatonetwork/automate-sdk
+```
+
+> **Note:** Typescript Functions are still in private beta, make sure to use the beta version of the automate-sdk to have access to it
+
+## Typescript Function
+Import the sdk and create task, passing your typescript function CID & arguments:
+
+```typescript
+import { AutomateSDK, Web3Function } from "@gelatonetwork/automate-sdk";
+
+const automate = new AutomateSDK(chainId, deployer);
+
+const { taskId, tx } = await automate.createBatchExecTask({
+  name: "Web3Function - Eth Oracle",
+  web3FunctionHash: cid,
+  web3FunctionArgs: {
+    oracle: oracle.address,
+    currency: "ethereum",
+  },
+  trigger: {
+    // Run every minutes
+    type: TriggerType.TIME,
+    interval: 60 * 1000,
+  },
+});
+await tx.wait();
+```
+
+You can specify cron trigger this way:
+
+```typescript
+trigger: {
+  type: TriggerType.CRON,
+  cron: "0 8 * * *", // Run every day at 8:00
+}
+```
+
+event trigger like this:
+
+```typescript
+trigger: {
+  type: TriggerType.EVENT,
+  filter: {
+    // Listen to PriceUpdated event on Oracle contract
+    address: oracle.address,
+    topics: [[oracle.getEventTopic("PriceUpdated")]],
+  },
+  blockConfirmations: 0, // Trigger immediately
+},
+```
+
+And block trigger this way:
+
+```typescript
+trigger: {
+  type: TriggerType.BLOCK,
+}
+```
+
+If your task utilizes secrets, you can set them after the task has been created.
+
+```typescript
+const web3Function = new Web3Function(chainId, deployer);
+
+const secrets = {
+  API_KEY: "..." // Set your secret environment variables
+}
+await web3Function.secrets.set(secrts, taskId);
+```
+
+## Solidity Function
+Repeat the installation step as shown above, then import and instantiate the SDK:
+
+```typescript
+const automate = new AutomateSDK(chainId, signer);
+```
+
+Use createTask to automate your function calls:
+
+```typescript
+interface CreateTaskOptions {
+  name: string;             // your task name
+
+  // Function to execute
+  execAddress: string;      // address of your target smart contract
+  execSelector: string;     // function selector to execute on your target smart contract
+  execAbi?: string;         // ABI of your target smart contract
+
+  // Proxy caller
+  dedicatedMsgSender: boolean;  // task will be called via a dedicated msg.sender which you can whitelist (recommended: true)
+
+  // Optional: Pre-defined / static target smart contract inputs
+  execData?: string;        // exec call data 
+  
+  // Optional: Dynamic target smart contract inputs (using a resolver)
+  resolverAddress?: string; // resolver contract address
+  resolverData?: string;    // resolver call data (encoded data with function selector)
+  resolverAbi?: string;     // your resolver contract ABI
+
+  // Optional: Time based task params
+  interval?: number;        // execution interval in seconds
+  startTime?: number;       // start timestamp in seconds or 0 to start immediately (default: 0)
+  
+  // Optional: Single execution task
+  singleExec?: boolean;     // task cancels itself after 1 execution if true.
+  
+  // Optional: Payment params
+  useTreasury?: boolean;    // use false if your task is self-paying (default: true)
+}
+
+const params: CreateTaskOptions = {
+  name,
+  execAddress,
+  execSelector,
+  interval
+};
+
+const { taskId, tx }: TaskTransaction = await automate.createTask(params);
+```
+
+### Examples
+
+#### Deploy a contract & automate your function call:
+```typescript
+// Deploying Counter contract
+const counterFactory = await hre.ethers.getContractFactory("Counter");
+const counter = await counterFactory.deploy(GELATO_ADDRESSES[chainId].automate);
+await counter.deployed();
+
+// Call Counter.increaseCount(42) every 10 minutes
+const  { taskId, tx }: TaskTransaction = await automate.createTask({
+  execAddress: counter.address,
+  execSelector: counter.interface.getSighash("increaseCount(uint256)"),
+  execData: counter.interface.encodeFunctionData("increaseCount", [42]),
+  execAbi: counter.interface.format("json") as string,
+  interval: 10 * 60, // execute every 10 minutes
+  name: "Automated counter every 10min",
+  dedicatedMsgSender: true
+});​
+```
+
+#### Use a Checker to automate your function call:
+If you need more configurable execution condition and/or dynamic input data, you can create a task using Checker 
+
+```typescript
+// Prepare Task data to automate
+const counter = new Contract(COUNTER_ADDRESSES, counterAbi, signer);
+const resolver = new Contract(COUNTER_RESOLVER_ADDRESSES, counterResolverAbi, signer);
+const selector = counter.interface.getSighash("increaseCount(uint256)");
+const resolverData = resolver.interface.getSighash("checker()");
+
+// Create task
+const { taskId, tx }: TaskTransaction = await automate.createTask({
+  execAddress: counter.address,
+  execSelector: selector,
+  resolverAddress: resolver.address,
+  resolverData: resolverData,
+  name: "Automated counter using resolver",
+  dedicatedMsgSender: true
+});
+```
+
+## Automated Transaction
+The CreateTaskOptions interface is used for configuring Automated Transactions with the same structure and options as defined above.
+
+The only difference is you need to configure your automated transaction without the need for a checker function.
+
+Example:
+
+```typescript
+interface CreateTaskOptions {
+  name: string; // Name your task
+  execAddress: string; // Address of your target smart contract
+  execSelector: string; // Function selector to call on your target smart contract
+  execAbi?: string; // ABI of your target smart contract (optional)
+  execData?: string; // Call data for the function execution (optional)
+}
+```
+
+## Single Execution Task
+If you want to have Gelato call your function only once. If so, set singleExec flag to true when calling createTask.  
+
+```typescript
+const { taskId, tx }: TaskTransaction = await automate.createTask({
+  execAddress: counter.address,
+  execSelector: selector,
+  resolverAddress: counter.address,
+  resolverData: resolverData,
+  dedicatedMsgSender: true,
+  name: "Automated counter using resolver",
+  dedicatedMsgSender: true,
+  singleExec: true
+});
+```

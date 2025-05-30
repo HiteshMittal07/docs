@@ -1,3 +1,440 @@
 ---
 title: Relay API
 ---
+
+# Relay API
+
+How to communicate directly with the Gelato Relay API
+
+The Gelato Relay API endpoint URL is `https://api.gelato.digital/`
+
+The Swagger UI is located at `https://api.gelato.digital/api-docs`
+
+## Oracle queries
+
+### Get list of chains where the oracle is available
+
+```http
+GET /oracles HTTP/1.1
+Host: api.gelato.digital
+Accept: */*
+```
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 200 | Successful Retrieval |
+
+**Response Body**
+```json
+{
+  "oracles": [
+    "text"
+  ]
+}
+```
+
+### Get the estimated fee in payment token with respect to the gas limit and priority
+
+```http
+GET /oracles/{chainId}/estimate?paymentToken=text&gasLimit=1&isHighPriority=true HTTP/1.1
+Host: api.gelato.digital
+Accept: */*
+```
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chainId | number | Id of the chain where the fee is estimated |
+
+**Query Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| paymentToken | string | Payment Token |
+| gasLimit | number | Gas limit |
+| isHighPriority | boolean | Priority \| if high: true, otherwise: false |
+| gasLimitL1 | number | Gas limit for Layer 1 \| For OP stack chains input BigInt(0) |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 200 | Successful Retrieval |
+| 404 | Oracle Not Found |
+
+**Response Body**
+```json
+{
+  "estimatedFee": "text",
+  "decimals": 1
+}
+```
+
+### Get all the payment tokens on a chain
+
+```http
+GET /oracles/{chainId}/paymentTokens HTTP/1.1
+Host: api.gelato.digital
+Accept: */*
+```
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chainId | number | Id of the chain where payments tokens are retrieved |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 200 | Successful Retrieval |
+| 404 | Oracle Not Found |
+
+**Response Body**
+```json
+{
+  "paymentTokens": [
+    "text"
+  ]
+}
+```
+
+### Get the conversion rate from the native token to the requested token
+
+```http
+GET /oracles/{chainId}/conversionRate HTTP/1.1
+Host: api.gelato.digital
+Accept: */*
+```
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chainId | number | Id of the chain where the conversion rate is estimated |
+
+**Query Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| to | string | Token in which the conversion rate is estimated from the native token of the selected chain. If a value is not provided, it will default to the USDC address on the selected chain |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 200 | Successful Conversion Rate Response |
+| 400 | Bad Request |
+| 404 | Oracle Not Found |
+
+**Response Body**
+```json
+{
+  "chainId": "text",
+  "from": "text",
+  "to": "text",
+  "conversionRate": 1,
+  "details": {
+    "numerator": "text",
+    "denominator": "text"
+  }
+}
+```
+
+## Relay Endpoints
+
+### Informational
+
+#### Get list of chains where relay v2 is available
+
+```http
+GET /relays/v2 HTTP/1.1
+Host: api.gelato.digital
+Accept: */*
+```
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 200 | Successful Retrieval |
+
+**Response Body**
+```json
+{
+  "relays": [
+    "text"
+  ]
+}
+```
+
+### Sending Relay Requests
+
+Each relay request method possesses optional parameters such as the `gasLimit`, and `retries`.
+
+#### Place a relay v2 callWithSyncFee request
+
+For more information, please click [here](https://docs.gelato.network/developer-products/gelato-relay-sdk/sdk-methods/relaywithsyncfee).
+
+```http
+POST /relays/v2/call-with-sync-fee HTTP/1.1
+Host: api.gelato.digital
+Content-Type: application/json
+Accept: */*
+```
+
+**Request Body**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chainId | number | Chain ID |
+| target | string | Target contract address |
+| data | string | Encoded function data |
+| feeToken | string | Token to pay fees with |
+| sponsorApiKey | string | API key for sponsorship |
+| gasLimit | string | Gas limit |
+| retries | number | Number of retries |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 201 | Successfully placed a callWithSyncFee request |
+| 400 | Validation Error |
+| 404 | Service Not Found |
+
+**Response Body**
+```json
+{
+  "taskId": "text"
+}
+```
+
+#### Place a relay v2 callWithSyncFeeERC2771 request
+
+For more information, please click [here](https://docs.gelato.network/developer-products/gelato-relay-sdk/sdk-methods/relaywithsyncfeeERC2771).
+
+```http
+POST /relays/v2/call-with-sync-fee-erc2771 HTTP/1.1
+Host: api.gelato.digital
+Content-Type: application/json
+Accept: */*
+```
+
+**Request Body**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chainId | number | Chain ID |
+| target | string | Target contract address |
+| data | string | Encoded function data |
+| user | string | User address |
+| userNonce | number | User nonce |
+| userDeadline | number | User deadline |
+| userSignature | string | User signature |
+| feeToken | string | Token to pay fees with |
+| isRelayContext | boolean | Whether to use relay context |
+| sponsorApiKey | string | API key for sponsorship |
+| gasLimit | string | Gas limit |
+| retries | number | Number of retries |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 201 | Successfully placed a callWithSyncFeeERC2771 request |
+| 400 | Validation Error |
+| 404 | Service Not Found |
+
+**Response Body**
+```json
+{
+  "taskId": "text"
+}
+```
+
+#### Place a relay v2 sponsoredCall request
+
+For more information, please click [here](https://docs.gelato.network/developer-products/gelato-relay-sdk/sdk-methods/relaywithsponsoredcall).
+
+```http
+POST /relays/v2/sponsored-call HTTP/1.1
+Host: api.gelato.digital
+Content-Type: application/json
+Accept: */*
+```
+
+**Request Body**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chainId | number | Chain ID |
+| target | string | Target contract address |
+| data | string | Encoded function data |
+| sponsorApiKey | string | API key for sponsorship |
+| gasLimit | string | Gas limit |
+| retries | number | Number of retries |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 201 | Successfully placed a sponsoredCall relay request |
+| 400 | Validation Error |
+| 404 | Service Not Found |
+
+**Response Body**
+```json
+{
+  "taskId": "text"
+}
+```
+
+#### Place a relay v2 sponsoredCallERC2771 request
+
+For more information, please click [here](https://docs.gelato.network/developer-products/gelato-relay-sdk/sdk-methods/relaywithsponsoreduserauthcall).
+
+```http
+POST /relays/v2/sponsored-call-erc2771 HTTP/1.1
+Host: api.gelato.digital
+Content-Type: application/json
+Accept: */*
+```
+
+**Request Body**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| chainId | number | Chain ID |
+| target | string | Target contract address |
+| data | string | Encoded function data |
+| user | string | User address |
+| userNonce | number | User nonce |
+| userDeadline | number | User deadline |
+| userSignature | string | User signature |
+| sponsorApiKey | string | API key for sponsorship |
+| gasLimit | string | Gas limit |
+| retries | number | Number of retries |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 201 | Successfully placed a sponsoredCallERC2771 relay request |
+| 400 | Validation Error |
+| 404 | Service Not Found |
+
+**Response Body**
+```json
+{
+  "taskId": "text"
+}
+```
+
+## Task Tracking
+
+### Get task status of the relay v2 task id
+
+```http
+GET /tasks/status/{taskId} HTTP/1.1
+Host: api.gelato.digital
+Accept: */*
+```
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| taskId | string | Id of the task whose status is retrieved |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 200 | Successful Retrieval |
+| 404 | Status Not Found |
+| 500 | Service Not Available |
+
+**Response Body**
+```json
+{
+  "task": {
+    "chainId": 1,
+    "taskId": "text",
+    "taskState": "CheckPending",
+    "creationDate": "text",
+    "lastCheckDate": "text",
+    "lastCheckMessage": "text",
+    "transactionHash": "text",
+    "executionDate": "text",
+    "blockNumber": 1
+  }
+}
+```
+
+## Debug Endpoint
+
+### Retrieve debug information for a specific task
+
+```http
+GET /tasks/status/{taskId}/debug HTTP/1.1
+Host: api.gelato.digital
+Accept: */*
+```
+
+**Path Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| taskId | string | The ID of the task to retrieve debug information for |
+
+**Query Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| tenderlyUsername | string | Username for Tenderly account |
+| tenderlyProjectName | string | Project name on Tenderly |
+
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| 200 | Successful response with debug information |
+| 400 | Bad request if the task ID or parameters are missing or incorrect |
+| 404 | Not found if the task ID does not exist |
+
+**Response Body**
+```json
+{
+  "data": {
+    "to": "text",
+    "from": "text",
+    "calldata": "text",
+    "blockNumber": 1,
+    "gasLimit": 1,
+    "chainId": 1,
+    "taskId": "text"
+  },
+  "debugger": {
+    "tenderly": "text"
+  }
+}
+```
+
+### How to use it with Tenderly
+
+If you'd like to use the debug endpoint with Tenderly, you can make use of the debug endpoint by adding the following parameters:
+
+- `tenderlyUsername`
+- `tenderlyProjectName`
+
+The request URL should look like this:
+```
+https://api.gelato.digital/tasks/status/{yourRelayTaskId}/debug?tenderlyUsername={yourUserName}&tenderlyProjectName={yourProjectName}
+```
+
+Everything will already be pre-set, all you need to do is click on "Simulate" and check what might have been the point of failure.

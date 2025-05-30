@@ -1,3 +1,25 @@
 ---
 title: Using UI
 ---
+
+# Using the UI
+
+## Creating a Web3 Function Task via the UI
+This method is ideal for developers or operators who prefer a graphical interface for task configuration. For instance, if you're a developer who wants to quickly test a function or a non-technical person looking to schedule a recurring job without writing any code.
+
+In order to create a task that will automatically run your Web3 Function on your behalf, go to https://app.gelato.network/ and click on the "Create Task" button.
+
+<img src="/images/create_task_ui_web3.png" alt="Create Task UI" />
+
+To learn about creating Typescript function tasks from the UI: [Creating Typescript Function Task](/Web3-Functions/How-To-Guides/Write-Typescript-functions)
+
+To learn about creating Solidity function tasks from the UI: [Creating Solidity Function Tasks](/Web3-Functions/How-To-Guides/Write-solidity-functions)
+
+To learn about creating Automated Transaction Tasks from the UI: [Initiate an Automated Transaction](/Web3-Functions/How-To-Guides/Initiate-an-automated-transactions)
+
+## Single Execution Task
+If you want to have Gelato call your function only once. If so, you can open up the Advanced Settings panel when creating a new task and select Single execution task
+
+<img src="/images/task_properties_web3_ui.png" alt="Task Properties UI" />
+
+> **Note:** The task will still be canceled if the execution reverts on-chain

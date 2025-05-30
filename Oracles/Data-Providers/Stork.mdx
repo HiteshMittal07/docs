@@ -1,3 +1,57 @@
 ---
 title: Stork
 ---
+
+# Stork
+
+After reading this page:
+
+- You'll go through a process to understand the way to integrate Stork price feeds after creating task on Gelato app.
+
+> **Note:** Please create oracle tasks using the UI available in the oracle section of the Gelato App. Manual creation via web3-functions is discouraged to ensure proper configuration and operation.
+
+## Initial Steps
+
+### 1. Create an Oracle Task in the Gelato App
+
+As outlined in the [Quick Start guide](/oracles/how-to-guides/create-a-oracle-task), begin by creating a new Oracle Task in the Gelato App. Select Stork as your data provider and choose the specific price feeds you wish to monitor. This setup ensures your application receives real-time data from the selected pairs.
+
+### 2. Fund Your Dedicated msg.sender Address
+
+It is necessary to pass deposit some ETH to your dedicated msg.sender because Stork enforces a fee for each price update. This fee is calculated dynamically based on the number of updates you submit, though in most cases, it amounts to just 1 WEI per update. To prevent transaction reversion, ensure that your dedicated msg.sender address is sufficiently funded to cover these fees.
+
+![Stork Funding](/images/stork.png)
+
+### 3. Integrate the Price Feeds into Your Smart Contract
+
+Once your Oracle Task is live, you can pull the associated price feeds into your smart contract. For a list of Stork contract addresses and integration details, refer to the [Supported Networks](/oracles/additional-resources/supported-networks). Incorporate these feeds into your contract's logic as needed to automate on-chain functions with reliable, accurate market data.
+
+## Example Code
+
+```solidity
+// YourContract.sol
+contract YourContract {
+    IStork public stork;
+    // ...
+    constructor (address _stork /*, ...*/) {
+        stork = IStork(_stork);
+        // ...
+    }
+    //...
+}
+
+interface IStork {
+    function getTemporalNumericValueUnsafeV1(
+        bytes32 id
+    ) external view returns (StorkStructs.TemporalNumericValue memory value);
+}
+
+contract StorkStructs {
+    struct TemporalNumericValue {
+        // slot 1
+        // nanosecond level precision timestamp of latest publisher update in batch
+        uint64 timestampNs; // 8 bytes
+        // should be able to hold all necessary numbers (up to 6277101735386680763835789423207666416102355444464034512895)
+        int192 quantizedValue; // 8 bytes
+    }
+}

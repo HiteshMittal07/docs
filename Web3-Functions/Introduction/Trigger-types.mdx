@@ -1,3 +1,31 @@
 ---
 title: Trigger Types
 ---
+
+# Trigger Types
+
+## 1. Time Interval
+Use this trigger to execute tasks at regular intervals, e.g., every 10 minutes or once every 24 hours. It's like setting a straightforward, recurring alarm.
+
+## 2. Cron Expressions
+This offers a more refined control compared to the Time Interval. With cron expressions, you can set tasks to run at specific moments, such as "every Tuesday at 3 PM" or "on the 1st of every month". It gives you precision in task scheduling.
+
+## 3. On-Chain Event
+Ideal for those wanting their tasks to respond dynamically to blockchain activities. Whenever a specified event occurs on the blockchain, e.g. 
+
+```solidity, sol
+//event creation with argument types and names
+event ownerChanged(address indexed _from, address indexed _to);
+```
+
+this trigger springs your task into action. 
+
+## 4. Every Block
+This function operates with the rhythm of the blockchain itself, executing your chosen function each time a new block is created.
+
+## Note
+Irrespective of the trigger type you opt for, you can tie it to running any of the following:
+
+- [Typescript Function](/Web3-Functions/Introduction/Typescript-functions)
+- [Solidity Function](/Web3-Functions/Introduction/Solidity-functions)
+- [Transaction](/Web3-Functions/Introduction/Automated-transactions)

@@ -1,3 +1,33 @@
 ---
 title: Create a Fallback VRF
 ---
+
+# Create a Fallback VRF
+
+Fallback VRF is a mechanism designed to fulfill missing or unfulfilled VRF requests. By creating a fallback task alongside your main VRF task, you can ensure that all requests are fulfilled in any scenario.
+
+Setting up a fallback task for VRF is a straightforward process. Here's a step-by-step guide to help you create one.
+
+## 1. Deploy VRF Compatible Contract
+
+Before deploying Fallback VRF, ensure that your contract is compatible with VRF. You can quickly set up one by heading over to the [quick start guide](/vrf/how-to-guides/deploy-your-contract-inheriting-gelato-vrf).
+
+## 2. Select Deployment Network
+
+Navigate to the [Gelato app](https://app.gelato.network) and ensure you choose the same network where both your Main VRF task and VRF compatible contracts are deployed.
+
+![Fallback VRF](/images/fallback_vrf.avif)
+
+## 3. Enter Fallback Parameters 
+
+Fallback VRF has three main parameters:
+
+- **From Block**: The block number from which the fallback will start analyzing missing events. It is recommended to use the block number of your VRF-compatible contract deployment.
+
+- **Time**: The interval at which the fallback task checks for missing events.
+
+- **Contract Address**: The address of your deployed VRF-compatible contract.
+
+## 4. Launch your Fallback VRF Instance
+
+Once all details are correctly entered, go ahead and launch your Fallback Gelato VRF instance.
