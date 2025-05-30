@@ -1,3 +1,129 @@
 ---
 title: Test & Deploy Typescript Functions
 ---
+
+# Test, Deploy & Run Typescript functions
+
+## Testing Typescript Functions
+To test your Typescript Function locally, run:
+
+```bash
+npx w3f test path/to/web3-functions/index.ts --logs
+```
+
+or
+
+```bash
+npx hardhat w3f-run W3FNAME --logs
+```
+
+Example:
+
+```bash
+npx w3f test oracle/index.ts --logs
+```
+
+### Optional flags:
+- `--logs` Show internal Web3 Function logs
+- `--debug` Show Runtime debug messages
+- `--chain-id [NETWORK]` Set the default runtime network & provider.
+
+Example:
+
+```bash
+npx w3f test path/to/web3-functions/index.ts --logs --chain-id=<chain id>
+```
+
+or
+
+```bash
+npx hardhat wrf-run web3-function --logs --network hardhat
+```
+
+Output:
+
+```bash
+Web3Function Build result:
+ ✓ Schema: /Users/chuahsonglin/Documents/GitHub/Gelato/contract/w3f-template/web3-functions/oracle/schema.json
+ ✓ Built file: /Users/chuahsonglin/Documents/GitHub/Gelato/contract/w3f-template/.tmp/index.js
+ ✓ File size: 2.47mb
+ ✓ Build time: 947.91ms
+
+Web3Function user args validation:
+ ✓ currency: ethereum
+ ✓ oracle: 0x71B9B0F6C999CBbB0FeF9c92B80D54e4973214da
+
+Web3Function running logs:
+> Last oracle update: 0
+> Next oracle update: 3600
+> Updating price: 1898
+
+Web3Function Result:
+ ✓ Return value: {
+  canExec: true,
+  callData: [
+    {
+      to: '0x71B9B0F6C999CBbB0FeF9c92B80D54e4973214da',
+      data: '0x8d6cc56d000000000000000000000000000000000000000000000000000000000000076a'
+    }
+  ]
+}
+
+Web3Function Runtime stats:
+ ✓ Duration: 1.35s
+ ✓ Memory: 113.55mb
+ ✓ Storage: 0.03kb
+ ✓ Rpc calls: 3
+```
+
+## Deploying Typescript Functions
+To compile your Typescript Function and deploy it to IPFS, use
+
+```bash
+npx w3f deploy path/to/web3-functions/index.ts --chain-id=<chain-id>
+```
+
+or
+
+```bash
+npx hardhat w3f-deploy W3FNAME --network sepolia
+```
+
+Example:
+
+```bash
+npx w3f deploy oracle/index.ts --chain-id=11155111
+```
+
+Once uploaded, Gelato Nodes will pin the file on your behalf on IPFS. If the upload was successful, you should get the IPFS CID of your Typescript Function returned. 
+
+```bash
+ ✓ Web3Function deployed to ipfs.
+ ✓ CID: QmbQJC5XGpQUsAkLq6BqpvLtD8EPNDEaPqyFf4xK3TM6xj
+```
+
+> **Note:** This CID will be different for every new Typescript Function version that you will deploy.
+
+## Creating Typescript Function Task
+Before creating solidity function tasks, familiarize yourself with the available Trigger Types!
+
+<img src="/images/create_ts_function_task.png" alt="Creating Typescript Function Task" />
+
+### Selection of Function
+1. Navigate to the What to trigger section.
+2. Within the Typescript Function subsection, find the IPFS CID input box.
+
+### Function Details Input
+1. Input the CID you secured after deploying your Typescript function.
+2. Upon entry, you should see a message like "Typescript Function code imported," signifying a successful connection.
+
+### Network Configuration
+1. Scroll to the Network dropdown menu.
+2. Choose the blockchain network where the Typescript function should work, e.g., "Göerli."
+
+### Task Configuration
+If your Typescript function needs secret variables or API keys, securely enter them in the Task Secrets section. For every secret:
+
+- **Key**: Define the name of the variable or key, e.g., "API_KEY".
+- **Value**: Enter the associated secret value.
+- Click Save after each input to guarantee its safe storage.

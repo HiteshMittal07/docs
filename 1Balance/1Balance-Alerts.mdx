@@ -1,3 +1,71 @@
 ---
 title: 1Balance Alerts
 ---
+
+# 1Balance Alerts
+
+Get alerted when your balance is running low. If you are utilizing Gelato 1Balance, you can subscribe to a real-time alerting system that uses Email, Telegram or Discord to inform you when your 1Balance funds drop below a specified threshold.
+
+## Email
+
+You can opt-in for email notifications. This feature ensures you are promptly informed when your balance falls below a specified minimum threshold, allowing you to take immediate action to replenish your funds.
+
+To receive low balance alerts via email, ensure your email address is verified in the settings. You can set up alerts to be sent when your balance is low by toggling the feature in the 'Low Balance Alerts' section and defining the minimum balance.
+
+![1Balance Alerts Settings](/images/1balance_alerts_1.avif)
+![1Balance Alerts Example](/images/1balance_alerts_2.png)
+
+*Alert received that balance has dropped below 4.9 USDC*
+
+### Additional Alert Triggers
+
+The system will send out alerts not only for low balances but also when:
+
+- Your balance reaches zero.
+- Should your account enter overdraft.
+- When the allotted overdraft amount is fully utilized.
+
+## Telegram
+
+DM [GelatoWatcherBot](https://t.me/GelatoWatcherBot) on Telegram. 
+
+Choose from the list of commands below.
+
+| Command | Usage |
+|---------|-------|
+| `/balance` | This command initiates the balance alert system on Telegram. After entering this command, the bot will start sending alerts for your balance. |
+| `/1balance_threshold` | This command allows you to configure the balance threshold. The bot will ask for a token and a threshold value. Respond with a comma-separated input in the form (TOKEN, THRESHOLD). For example, USDC,100 sets a threshold of 100 for USDC. |
+| `/list_threshold` | This command lists all your set thresholds. |
+| `/stop_balance` | This command stops the balance alert system. If you wish to stop receiving balance alerts, enter this command. |
+
+## Discord Server
+
+Add Gelato Bot to your server using this [invite link](https://discord.com/api/oauth2/authorize?client_id=123456789&permissions=8&scope=bot) (you need to be the admin of the server)
+
+If you want to receive notifications in a private channel, make sure to add Gelato Bot as a member in the channel where you want to receive the notification.
+
+Enter the following commands in the channel you want to receive alerts.
+
+| Command | Usage |
+|---------|-------|
+| `/balance-channel address` | This command initiates the balance alert system on your Discord server. Replace address with the address you want to set up alerts for. |
+| `/1balance-threshold-channel token threshold` | This command allows you to configure the balance threshold. Replace token and threshold with the respective token and threshold value. |
+| `/list-threshold-channel` | This command lists all your set thresholds. |
+| `/stop-balance-channel` | This command stops the balance alert system. If you wish to stop receiving balance alerts, enter this command. |
+
+## Discord Direct Message (DM)
+
+Join our [Gelato Discord server](https://discord.gg/gelato)
+
+Choose from the list of commands below
+
+| Command | Usage |
+|---------|-------|
+| `/balance-dm address` | This command initiates the balance alert system in a Direct Message on Discord. Replace address with the address you want to set up alerts for. |
+| `/1balance-threshold-dm token threshold` | This command allows you to configure the balance threshold. Replace token and threshold with the respective token and threshold value. |
+| `/list-threshold-dm` | This command lists all your set thresholds. |
+| `/stop-balance-dm` | This command stops the balance alert system. If you wish to stop receiving balance alerts, enter this command. |
+
+## Subscription Notifications
+
+If you would like to receive Subscription notifications emails, please contact our support team.

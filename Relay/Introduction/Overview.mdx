@@ -1,3 +1,46 @@
 ---
 title: Overview
 ---
+
+# Relay
+
+Enabling developers to get transactions validated fast, reliably and securely
+
+Gelato Relay enables web3 developers like you to get on with what you do best, building. Gelato handles the blockchain complexities for you, every step of the way, from the moment you initiate the transaction, to the moment it is validated on-chain. We take the utmost care to make sure your transaction is relayed from off-chain to successfully carried out on-chain in the shortest amount of time, reliably within the next few blocks, and with no downtime.
+
+We support 45 EVM networks and a multitude of ways to pay using either native or ERC-20 tokens. In combination with Gelato 1Balance, a flexible cross-chain gas tank system which allows for payment across all supported networks using just one balance on the chain of your choosing.
+
+## What is the Gelato Relay SDK?
+
+Gelato Relay SDK offers a convenient suite of functions in order to interact with the Gelato Relay API. Gelato Relay API is a service that allows users and developers to get transactions validated fast, reliably and securely, without having to deal with the low-level complexities of blockchains.
+
+<img src="/images/relay_intro.avif" alt="Gelato Relay Overview" />
+
+## Overview of how Gelato Relay works
+
+As requests are submitted to Gelato Relay, a network of decentralised Gelato Executors will execute and get the transactions validated as soon as possible. EIP-712 signatures enforce the integrity of data, while gas fee payments can be handled in any of our supported payment methods. In this way, developers can rely on Gelato's battle-tested blockchain infrastructure improving the UX, costs, security and liveness of their Web3 systems.
+
+## Security Considerations
+
+While Gelato Relay offers very powerful features, improper implementation can introduce vulnerabilities in your contracts. We strongly recommend always using the built-in ERC-2771 user signature verification found in our sponsoredCallERC2771 or callWithSyncFeeERC2771 methods to enhance security.
+
+Please read the Security Considerations section to understand all potential security risks and measures to mitigate them when using a Gelato Relay.
+
+## How can I get started with gasless transactions?
+
+1. Deploy a compatible contract, or use one of ours (see code example links below).
+2. Run the code examples found on each SDK method page:
+   - [sponsoredCallERC2771](/relay/sdk/sponsoredCallERC2771)
+   - [callWithSyncFeeERC2771](/relay/sdk/callWithSyncFeeERC2771)
+   - [sponsoredCall](/relay/sdk/sponsoredCall)
+   - [callWithSyncFee](/relay/sdk/callWithSyncFee)
+
+That's all it takes to get started with Gelato Relay and the Gelato Relay SDK!
+
+We hope you have as much fun using Gelato Relay as we did building it! 😄
+
+Any feedback, please get in touch!
+
+## API Docs
+
+If your codebase is not JS compatible, you can use the Gelato Relay API directly. Please find the API docs [here](/relay/api).

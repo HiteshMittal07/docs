@@ -1,3 +1,39 @@
 ---
 title: ERC-2771 Migration Guide
 ---
+
+# ERC-2771 Migration Guide
+
+How to migrate to the new Gelato Relay ERC2771 contracts
+
+> **Note:** This only applies if you are using `@gelatonetwork/relay-sdk` v3 or contracts from the package `@gelatonetwork/relay-context` v2
+
+Gelato Relay ERC2771 proxy contracts are immutable for security reasons. We have deployed new versions of our ERC2771 proxy contracts with enhanced security: `GelatoRelayERC2771.sol` and `GelatoRelay1BalanceERC2771.sol`, new addresses of which you can find [here](/relay/additional-resources/supported-networks).
+
+To support these new contracts, Relay Context Contracts found in the package `@gelatonetwork/relay-context` have been updated to version v3, along with the Gelato Relay SDK package `@gelatonetwork/relay-sdk`, which has been updated to version v4.
+
+Gelato Relay continues to support ERC2771 contracts that inherit from the legacy `@gelatonetwork/relay-context` v2, so you can upgrade at your own convenience. Nevertheless we recommend you to upgrade as soon as possible to ensure optimal security, features and support.
+
+## Package and Contract Compatibility Matrix
+
+| Gelato Relay ERC2771 Contract | relay-sdk | relay-context |
+|-------------------------------|-----------|---------------|
+| Legacy GelatoRelayERC2771.sol: `0xBf175FCC7086b4f9bd59d5EAE8eA67b8f940DE0d` | v3 | v2 |
+| GelatoRelayERC2771.sol: `0xb539068872230f20456CF38EC52EF2f91AF4AE49` | v4 | v3 |
+| GelatoRelay1BalanceERC2771.sol: `0xd8253782c45a12053594b9deB72d8e8aB2Fca54c` | v4 | v3 |
+
+> **Note:** Contract addresses differ on zkSync Era.
+
+Using `@gelatonetwork/relay-sdk` v3 with contracts inheriting from `@gelatonetwork/relay-context` v3, or using `@gelatonetwork/relay-sdk` v4 with contracts inheriting from `@gelatonetwork/relay-context` v2 won't work, as they refer to different Gelato Relay ERC2771 contracts.
+
+## Migration Steps
+
+1. If you deployed contracts that inherit from `@gelatonetwork/relay-context` - update the package version and either upgrade or redeploy your contracts.
+
+2. If you are using `sponsoredCallERC2771` in combination with `ERC2771Context.sol` - make sure to use the new `GelatoRelay1BalanceERC2771.sol` contract address as the trustedForwarder which you can find [here](/relay/additional-resources/supported-networks).
+
+3. If you are using `@gelatonetwork/relay-sdk` - update the package version in your project.
+
+4. Make sure you use your newly upgraded/deployed contract addresses with the updated Gelato Relay SDK package.
+
+If you cannot upgrade or redeploy your ERC2771-compatible contracts, please contact us to find a future-proof solution together.

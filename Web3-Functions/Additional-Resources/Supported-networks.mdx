@@ -1,3 +1,95 @@
 ---
 title: Supported Networks
 ---
+
+# Supported Networks
+
+The following networks are supported:
+
+| Network | Environment | Notes |
+|---------|-------------|-------|
+| Abstract | Mainnet | abstract mainnet |
+| Aleph Zero | Mainnet, Testnet | old deployments |
+| Arbitrum | Mainnet, Testnet | old deployments |
+| Arbitrum Blueberry | Testnet | old deployments |
+| Avalanche | Mainnet | old deployments |
+| Base | Mainnet, Testnet | old deployments |
+| Berachain | Mainnet, Bepolia | new deployments |
+| Binance Smart Chain | Mainnet | old deployments |
+| Blast | Mainnet, Testnet | old deployments |
+| Camp Network | Testnet | old deployments |
+| Corn | Maizenet | new deployments |
+| EDU Chain | Testnet | old deployments |
+| Everclear (prev Connext) | Mainnet, Testnet | old deployments |
+| Ethereum | Mainnet, Testnet | old deployments |
+| Fantom | Mainnet | old deployments |
+| Filecoin | Mainnet | new deployments |
+| Gnosis | Mainnet | old deployments |
+| Ink | Mainnet, Sepolia | new deployments |
+| Linea | Mainnet | old deployments |
+| Lisk | Mainnet, Sepolia | old deployments |
+| Lumia | Mainnet | new deployments |
+| MegaETH | Testnet | new deployments |
+| Metis | Mainnet | old deployments |
+| Mode | Mainnet | old deployments |
+| Monad | Testnet | new deployments |
+| Nibiru | Mainnet, Testnet | new deployments |
+| Optimism | Mainnet, Testnet | old deployments |
+| Playblock | Mainnet | old deployments |
+| Polygon | Mainnet, Amoy | old deployments |
+| Polygon zkEVM | Mainnet | old deployments |
+| Reya | Mainnet, Cronos | old deployments |
+| Rootstock | Mainnet, Testnet | old deployments, new deployments |
+| Singularity Finance | Testnet | new deployments |
+| Sonic | Mainnet | new deployments |
+| Story | Mainnet | new deployments |
+| Tangible | re.al, unreal | old deployments |
+| zkSync Era | Mainnet | zksync era |
+
+## Contract Addresses
+Web3 Functions during the private beta uses a custom deployment of the `Automate.sol` contract as an entry point.
+
+On the Automate smart contract users create or cancel and Gelato executes tasks. By default, Web3 Functions uses the dedicated msg.sender module, which means all transactions to the defined destination contract will be routed via your dedicated msg.sender proxy contract.
+
+> **Note:** If you have an access restriction in your smart contract function and want to whitelist your personal Gelato smart contract wallet as a msg.sender, you don't need to do anything. We automatically deploy your own dedicated msg.sender for you at the first task creation - the address to whitelist will be shown in the UI and can also be retrieved via the Automate SDK.
+
+### Old Deployments
+
+| Contract | Address |
+|----------|---------|
+| Automate | 0x2A6C106ae13B558BB9E2Ec64Bd2f1f7BEFF3A5E0 |
+| 1Balance | 0x7506C12a824d73D9b08564d5Afc22c949434755e |
+
+### ZkSync Era
+
+| Contract | Address |
+|----------|---------|
+| Automate | 0xF27e0dfD58B423b1e1B90a554001d0561917602F |
+
+### New Deployments (Oct 2024)
+
+| Contract | Address |
+|----------|---------|
+| Automate | 0xafd37d0558255aA687167560cd3AaeEa75c2841E |
+
+### Abstract Mainnet
+
+| Contract | Address |
+|----------|---------|
+| Automate | 0xDc04c452547a4B3b81102333f40FD4bF45D355Ce |
+
+### Nibiru Mainnet
+
+| Contract | Address |
+|----------|---------|
+| Automate | 0x9B0b9dd9682409Ed6AE6657FB392AA0dDc77Ae6E |
+
+### Blast Contract Addresses
+
+| Contract/Wallet | Address |
+|-----------------|---------|
+| BlastPointsContract | 0xFec1E33eBe899906Ff63546868A26E1028700b0e |
+| PointsOperator | 0xE2491005A76F6ebE34b3D33C7434EbA676561bf3 |
+| GelatoBlastPoints(dummy) | 0xf9725d5aCEDB20b45d3E7B39e4D2554dfa385bc3 |
+
+If you don't see a network that you'd like supported, feel free to reach out to us.

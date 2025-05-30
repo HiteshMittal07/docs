@@ -1,3 +1,41 @@
 ---
 title: Test & Deploy Solidity Functions
 ---
+
+# Test, Deploy & Run Solidity Functions
+
+## Testing Solidity Functions
+The purpose of this repo is to showcase unit tests examples of using Gelato Solidity Functions in a Hardhat environment.
+
+[GitHub - gelatodigital/gelato-solidity-functions-unit-testing](https://github.com/gelatodigital/gelato-solidity-functions-unit-testing)
+
+It's advised to conduct tests by impersonating Gelato's address within a Hardhat environment to ensure accurate simulation of Gelato Solidity Function executions.
+
+## Deploying Solidity Functions
+To deploy your Solidity functions, please proceed with deploying your contract to the network. Once deployed, ensure you verify your contract on Etherscan to enable automatic ABI fetching within our app.
+
+## Creating Solidity Function Tasks
+Before creating solidity function tasks, familiarize yourself with the available Trigger Types!
+
+<img src="/images/creating_solidity_function_tasks.png" alt="Creating Solidity Function Tasks" />
+
+### Selection of Function
+1. Navigate to the What to trigger section.
+2. Choose the Solidity Function option
+
+### Network Configuration
+1. Locate the Network dropdown.
+2. Select your desired blockchain network where the contract is deployed, e.g., "Göerli."
+
+### Function Details Input
+1. Under the Solidity Function section, find the input labeled Contract Address.
+2. Enter the Ethereum address of your deployed Solidity contract. Ensure accuracy as this determines where your functions will interact.
+3. Once the contract address is entered, the ABI (Application Binary Interface) should automatically populate. If using a custom ABI, select the Custom ABI option and input it accordingly.
+
+### Task Configuration
+A checker function evaluates conditions before triggering the main function. From the Checker Function dropdown, choose the specific function you want as a condition checker.
+
+Enter the Target Contract where the automated function call should be sent. From the subsequent dropdown, select the specific function you wish to automate.
+
+<img src="/images/task_config.png" alt="Task Configuration" />
+

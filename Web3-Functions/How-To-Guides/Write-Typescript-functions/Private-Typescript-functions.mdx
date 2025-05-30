@@ -1,3 +1,166 @@
 ---
 title: Private Typescript Functions
 ---
+
+# Private Typescript Functions
+
+## Deployed Typescript Functions are public
+When you deploy a Typescript Function the code is stored and pinned on IPFS making it accessible to everyone. If you would prefer to conceal your code, one approach is to store your code in a private Github Gist. Subsequently, this code can be retrieved and executed through a Web3 Function.
+
+> **Note:** this approach introduces a dependency on Github's availability. We aim to directly support private Web3 Function deployments in the future.
+
+## Private Typescript Function example
+This Typescript Function fetches `onRun.js` (Github gist containing concealed code) with its gist id and executes it during runtime. Check out the example on [GitHub](https://github.com/your-repo-link) here.
+
+The code in `onRun.js` must be in JavaScript
+
+### private-w3f/index.ts
+```typescript
+import {
+  Web3Function,
+  Web3FunctionContext,
+  Web3FunctionResult,
+} from "@gelatonetwork/web3-functions-sdk";
+import { Octokit } from "octokit";
+
+// import dependencies used in onRun.js
+import { ethers } from "ethers";
+import ky from "ky";
+
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { secrets } = context;
+
+  const gistId = (await secrets.get("GIST_ID")) as string;
+
+  const octokit = new Octokit();
+
+  let onRunScript: string | undefined;
+
+  // fetch onRun.js from private github gist
+  try {
+    const gistDetails = await octokit.rest.gists.get({
+      gist_id: gistId,
+    });
+
+    const files = gistDetails.data.files;
+
+    if (!files) throw new Error(`No files in gist`);
+
+    for (const file of Object.values(files)) {
+      if (file?.filename === "onRun.js" && file.content) {
+        onRunScript = file.content;
+        break;
+      }
+    }
+
+    if (!onRunScript) throw new Error(`No onRun.js`);
+  } catch (err) {
+    return {
+      canExec: false,
+      message: `Error fetching gist: ${err.message}`,
+    };
+  }
+
+  // run onRun.js
+  try {
+    /**
+     * context are passed into onRun.js.
+     * onRun.js will have access to all userArgs, secrets & storage
+     */
+    const onRunFunction = new Function("context", "ky", "ethers", onRunScript);
+    const onRunResult: Web3FunctionResult = await onRunFunction(
+      context,
+      ky,
+      ethers
+    );
+
+    if (onRunResult) {
+      return onRunResult;
+    } else {
+      return { canExec: false, message: `No result returned` };
+    }
+  } catch (err) {
+    console.log(err);
+    return {
+      canExec: false,
+      message: `Error running gist: ${err.message}`,
+    };
+  }
+});
+```
+
+## Writing onRun.js
+Check out an example of a GitHub gist with `onRun.js` [here](https://gist.github.com/your-gist-link).
+
+### 1. onRun.js file structure
+`onRun.js` should return a promise.
+
+```javascript
+return (async () => {
+  // ... your code here
+})();
+```
+
+### 2. Using dependencies
+Dependencies that are used in `onRun.js` should be imported into the Web3 Function `index.ts` file, not in `onRun.js`.
+
+```typescript
+// import dependencies used in onRun.js
+import { ethers } from "ethers";
+import ky from "ky";
+```
+
+### 3. Accessing Web3 Function Context
+Web3 Function context which includes, secrets, userArgs, multiChainProvider can be accessed normally in `onRun.js`.
+
+```javascript
+return (async () => {
+    const {secrets, userArgs, multiChainProvider} = context
+})();
+```
+
+### 4. Return Web3 Function result
+Results returned in `onRun.js` will be bubbled up and returned in the private Web3 Function.
+
+```javascript
+return {
+  canExec: true,
+  callData: [
+    {
+      to: oracleAddress,
+      data: oracle.interface.encodeFunctionData("updatePrice", [price]),
+    },
+  ],
+}
+```
+
+## Creating private Typescript Function task
+
+### Secrets (strict)
+- `GIST_ID` (Github gist id to fetch onRun.js from)
+
+Make sure to store your GitHub gist id as a secret.
+
+### Arguments (not strict)
+Since GitHub gists are editable, you can have a userArgs to be a JSON string so that arguments can be editable without re-deploying a web3 function with a different schema.
+
+#### private-w3f/schema.json
+```json
+{
+  "web3FunctionVersion": "2.0.0",
+  "runtime": "js-1.0",
+  "memory": 128,
+  "timeout": 30,
+  "userArgs": {
+    "args": "string"
+  }
+}
+```
+
+Example args when creating your task:
+
+```json
+{
+  "args": "{\"currency\":\"ethereum\",\"oracle\":\"0x71B9B0F6C999CBbB0FeF9c92B80D54e4973214da\"}"
+}
+```

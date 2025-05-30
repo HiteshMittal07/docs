@@ -1,3 +1,43 @@
 ---
 title: Dedicated msg.sender
 ---
+
+# Security Considerations
+
+## Dedicated msg.sender
+For security reasons, during task creation, you will see an address which will be the msg.sender for your task executions.
+
+<img src="/images/security_considerations.png" alt="Web3 Security Considerations" />
+
+If you are the owner of the target contract in question, it's recommended to implement a msg.sender restriction within your smart contract. This involves whitelisting a dedicated msg.sender address. Such a measure ensures that only tasks you have created can call your function, significantly elevating the security posture of your operations. For a hands-on guide and to manage your dedicated msg.sender settings, please connect to the app and visit your own Settings page.
+
+> **Note:** Remember that your dedicated msg.sender can vary across different blockchain networks. You can view the dedicated msg.sender for each network through the provided settings link.
+
+<img src="/images/web3_security_considerations.png" alt="Security Considerations" />
+
+> **Important:** msg.sender restrictions should be added to the function that Gelato will call during execution, not the checker function. Learn more about it here: [#1.-understand-the-role-of-a-checker](/Web3-Functions/Security-Considerations/Understand-the-role-of-a-checker)
+
+You can have this restriction by inheriting AutomateReady
+
+AutomateReady exposes a modifier onlyDedicatedMsgSender which restricts msg.sender to only task executions created by taskCreator defined in the constructor.
+
+```solidity
+modifier onlyDedicatedMsgSender() {
+    require(msg.sender == dedicatedMsgSender, "Only dedicated msg.sender");
+    _;
+}
+```
+
+If you would like to have additional callers for your function. You can implement a whitelist like so.
+
+```solidity
+mapping(address => bool) public whitelisted;
+
+modifier onlyWhitelisted() {
+    require(
+        whitelisted[msg.sender] || msg.sender == dedicatedMsgSender,
+        "Only whitelisted"
+    );
+    _;
+}
+```

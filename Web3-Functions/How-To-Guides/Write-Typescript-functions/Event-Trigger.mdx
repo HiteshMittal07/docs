@@ -1,3 +1,79 @@
 ---
 title: Event Trigger
 ---
+
+# Event Trigger
+
+Watch Now: Learn more by watching our video [Web3 Function Triggers](https://www.youtube.com/watch?v=your-video-id), available on YouTube.
+
+## Event Context
+For event triggered typescript functions, use the `Web3FunctionEventContext` instead of the regular `Web3FunctionContext` on your `onRun` handler.
+
+The context will then include a `log` property containing your full event log that you can parse and process.
+
+## Event Triggered Typescript Function example
+
+### event/index.ts
+```typescript
+import { Interface } from "@ethersproject/abi";
+import { Web3Function, Web3FunctionEventContext } from "@gelatonetwork/web3-functions-sdk";
+
+const NFT_ABI = [
+  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+];
+
+Web3Function.onRun(async (context: Web3FunctionEventContext) => {
+  // Get event log from Web3FunctionEventContext
+  const { log } = context;
+  
+  // Parse your event from ABI
+  const nft = new Interface(NFT_ABI);
+  const event = nft.parseLog(log);
+
+  // Handle event data
+  const { from, to, tokenId } = event.args;
+  console.log(`Transfer of NFT #${tokenId} from ${from} to ${to} detected`);
+  
+  return { canExec: false, message: `Event processed ${log.transactionHash}` };
+});
+```
+
+## Testing locally
+To test your event triggered typescript function, you can add a `log.json` file in your web3 function directory:
+
+<img src="/images/event_directory.png" alt="Event Directory Structure" />
+
+Copy in the `log.json` file the raw data of the event you want to test:
+
+### event/log.json
+```json
+{
+  "blockNumber": 48758053,
+  "blockHash": "0x6794a56583329794f184d50862019ecf7b6d8ba6b3210f68ca4b91a8fa81817d",
+  "transactionIndex": 29,
+  "removed": false,
+  "address": "0xb74de3F91e04d0920ff26Ac28956272E8d67404D",
+  "data": "0x",
+  "topics": [
+    "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+    "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "0x000000000000000000000000eec2ba9b9f0202c63bba29ea9a4ce5c23f9865fd",
+    "0x0000000000000000000000000000000000000000000000000000000000001099"
+  ],
+  "transactionHash": "0x2c500a55f5c24d587e73805975d91395634a971dca5939f43d34d774d0f7147b",
+  "logIndex": 343
+}
+```
+
+The data in `log.json` will be injected in your event context in local runs via CLI:
+
+```bash
+npx w3f test event/index.ts --logs
+```
+
+```bash
+Web3Function running logs:
+> Transfer of NFT #4249 from 0x0000000000000000000000000000000000000000 to 0xeeC2ba9B9F0202c63bba29Ea9A4Ce5c23f9865FD detected
+
+Web3Function Result:
+ ✓ Return value: {"canExec":false,"message":"Event processed 0x2c500a55f5c24d587e73805975d9"}

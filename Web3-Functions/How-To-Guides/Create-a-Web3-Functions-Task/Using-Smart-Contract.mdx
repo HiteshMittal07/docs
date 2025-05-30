@@ -1,3 +1,254 @@
 ---
 title: Using Smart Contract
 ---
+
+
+# Using a Smart contract
+You can create a task that uses Web3 Function from your smart contract as well.
+
+If your project involves complex interactions and you need the task creation to be a part of an on-chain transaction, you would directly interact with a smart contract.
+
+> **Note:** Web3 Function secrets are not available for smart contract created tasks.
+
+To create a Web3 Function task with your smart contract, you can inherit AutomateTaskCreator which has helper functions to easily create your task. 
+
+Pass the Module.PROXY & Module.WEB3_FUNCTION as modules in ModuleData
+
+```solidity
+ModuleData memory moduleData = ModuleData({
+    modules: new Module[](2),
+    args: new bytes[](2)
+});
+
+moduleData.modules[0] = Module.PROXY;
+moduleData.modules[1] = Module.WEB3_FUNCTION;
+```
+
+Use _web3FunctionModuleArg to encode arguments for WEB3_FUNCTION module. 
+
+```solidity
+function _web3FunctionModuleArg(
+    string memory _web3FunctionHash, // IPFS CID of deployed web3Function
+    bytes calldata _web3FunctionArgsHex // Abi encoded web3 function arguments
+) 
+```
+
+Here is how you can encode your Web3Function arguments to get web3FunctionArgsHex.
+
+In this example, the Web3Function has 2 arguments, counterW3fAddress & count . 
+
+schema.json
+```json
+{
+  "web3FunctionVersion": "2.0.0",
+  "runtime": "js-1.0",
+  "memory": 128,
+  "timeout": 30,
+  "userArgs": {
+    "counterW3fAddress": "string",
+    "count": "number"
+  }
+}
+```
+
+In your contract, you would encode the arguments according to the sequence defined in schema.json .
+
+```solidity
+function _getWeb3FunctionArgsHex(
+    address counterW3fAddress,
+    uint256 count
+) 
+internal 
+pure 
+returns (bytes memory web3FunctionArgsHex) {
+    web3FunctionArgsHex = abi.encode(counterW3fAddress, count)
+}
+```
+
+The full code can be found here.
+
+```solidity
+function createTask(
+    string memory _web3FunctionHash,
+    bytes calldata _web3FunctionArgsHex
+) external {
+    require(taskId == bytes32(""), "Already started task");
+
+    bytes memory execData = abi.encodeCall(this.increaseCount, (1));
+
+    ModuleData memory moduleData = ModuleData({
+        modules: new Module[](2),
+        args: new bytes[](2)
+    });
+    moduleData.modules[0] = Module.PROXY;
+    moduleData.modules[1] = Module.WEB3_FUNCTION;
+
+    moduleData.args[0] = _proxyModuleArg();
+    moduleData.args[1] = _web3FunctionModuleArg(
+        _web3FunctionHash,
+        _web3FunctionArgsHex
+    );
+
+    bytes32 id = _createTask(
+        address(this),
+        execData,
+        moduleData,
+        address(0)
+    );
+
+    taskId = id;
+    emit CounterTaskCreated(id);
+}
+```
+
+## Additional Info
+- Tasks created via this route cannot be named
+- Smart Contracts can also create and cancel tasks
+- You can find a list of example smart contracts here
+
+## Functions Exposed by AutomateTaskCreator
+
+### _createTask()
+Interacts and creates a task on the Gelato Automate smart contract.
+
+```solidity
+function _createTask(
+    address execAddress, 
+    bytes memory execDataOrSelector, 
+    ModuleData memory moduleData,
+    address feeToken 
+) internal returns (bytes32 taskId);
+```
+
+- execAddress - Address of the contract which Gelato will call
+- execDataOrSelector - Signature of function which Gelato will call / execution data (If Resolver Module is not used. More about modules below)
+- moduleData - Modules that are enabled for the task. (More about ModuleData below)
+- feeToken - Use address(0) if using Gelato 1balance. Use 0xeeeeee... for ETH or native tokens.
+
+### ModuleData
+```solidity
+struct ModuleData {
+    Module[] modules;
+    bytes[] args;
+}
+```
+
+Modules are conditions / specifications about your task. These are the current available Modules.
+
+```solidity
+enum Module {
+    RESOLVER,
+    PROXY,
+    SINGLE_EXEC,
+    WEB3_FUNCTION,
+    TRIGGER
+}
+```
+
+- RESOLVER - Define dynamic conditions and execution data
+- TIME - Repeated execution at a specific time and interval. (in ms)
+- PROXY - Your function will be called by a dedicated msg.sender
+- SINGLE_EXEC - Task is cancelled after one execution
+- WEB3_FUNCTION - Define a Typescript function to get off-chain execution data
+- TRIGGER - Define your execution trigger (Time interval, Event, every block, ...)
+
+Each Module would require additional arguments which is an encoded data.
+
+Including Module.Proxy in moduleData is mandatory, otherwise task creation will fail.
+
+You can use these helper functions to get the arguments for each Module.
+
+```solidity
+function _resolverModuleArg(address _resolverAddress, bytes memory _resolverData)
+
+function _proxyModuleArg()
+
+function _singleExecModuleArg()
+
+function _timeTriggerModuleArg(uint128 _start, uint128 _interval)
+
+function _cronTriggerModuleArg(string memory _expression)
+
+function _blockTriggerModuleArg()
+
+function _eventTriggerModuleArg(
+    address _address,
+    bytes32[][] memory _topics,
+    uint256 _blockConfirmations
+) internal pure returns (bytes memory)
+```
+
+Crafting ModuleData will look like this if we want to create a task which utilise RESOLVER, PROXY & SINGLE_EXEC Module.
+
+```solidity
+ModuleData memory moduleData = ModuleData({
+    modules: new Module[](3),
+    args: new bytes[](3)
+});
+
+moduleData.modules[0] = Module.RESOLVER;
+moduleData.modules[1] = Module.PROXY;
+moduleData.modules[2] = Module.SINGLE_EXEC
+
+moduleData.args[0] = _resolverModuleArg(
+    address(this),
+    abi.encodeCall(this.checker, ())
+);
+moduleData.args[1] = _proxyModuleArg();
+moduleData.args[2] = _singleExecModuleArg();
+```
+
+Module[] must follow the order RESOLVER, PROXY, SINGLE_EXEC, WEB3_FUNCTION, TRIGGER
+
+### _cancelTask()
+Cancels a task owned by the smart contract.
+
+```solidity
+function _cancelTask(bytes32 _taskId) internal
+```
+
+### onlyDedicatedMsgSender
+Function modifier to restrict msg.sender to only task executions created by taskCreator (defined in constructor). Learn more about it at [Security Considerations](/Web3-Functions/Security-Considerations/Dedicated-msg-sender)
+
+```solidity
+modifier onlyDedicatedMsgSender() {
+    require(msg.sender == dedicatedMsgSender, "Only dedicated msg.sender");
+    _;
+}
+```
+
+### _depositFunds1Balance()
+```solidity
+function _depositFunds1Balance(
+    uint256 _amount,
+    address _token,
+    address _sponsor
+)
+```
+
+Deposit funds into the Gelato 1balance contract.
+
+> **Note:** The _depositFunds1Balance method is only available on Polygon
+
+## Single Execution Task
+If you want to have Gelato call your function only once. If so, you can Include SingleExec module in ModuleData.modules. Check out the full code here.
+
+```solidity
+ModuleData memory moduleData = ModuleData({
+    modules: new Module[](2),
+    args: new bytes[](2)
+});
+
+moduleData.modules[0] = Module.PROXY;
+moduleData.modules[1] = Module.SINGLE_EXEC;
+
+moduleData.args[0] = _proxyModuleArg();
+moduleData.args[1] = _singleExecModuleArg();
+
+bytes32 id = _createTask(
+    address(this),
+    execData,
+    moduleData,
+    address(0)
+);
+```
