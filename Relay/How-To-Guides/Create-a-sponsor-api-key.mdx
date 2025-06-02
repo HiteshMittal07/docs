@@ -1,3 +1,36 @@
 ---
-title: Create a Sponsor API Key
+title: "Create a Sponsor API Key"
+description: "Learn how to create and manage a Sponsor API Key for gas sponsorship"
 ---
+
+<Steps>
+  <Step title="Create Your Gelato Account">
+    Sign up on the [Gelato App](https://relay.gelato.network/) to establish an account. This account is the foundation for setting up relay tasks and managing gas sponsorships.
+  </Step>
+
+  <Step title="Create a Relay App">
+    Within your Gelato account, create a relay app on the specific network where you plan to sponsor transactions. This step enables sponsored transactions on your chosen chain. Checkout supported networks [here](/Relay/Additional-Resources/Supported-networks)
+
+    <img height="200" src="/images/create-app-relay.png" />
+
+  </Step>
+
+  <Step title="Retrieve Your Sponsor API Key">
+    After creating the relay app, navigate to its dashboard to locate your Sponsor API Key. This key links your Gelato setup with 1Balance for gas sponsorship.
+
+    <Check>Gelato Relay now supports API key rotation, allowing users to create and delete API keys. This helps prevent unauthorized usage in case an API key is exposed.</Check>
+
+  </Step>
+
+  <Step title="Deposit Funds into 1Balance">
+    Add funds to your 1Balance account according to your target environment:
+
+    - **Mainnets**: Deposit USDC.
+    - **Testnets**: Deposit Sepolia ETH.
+
+    Since 1Balance is deployed on Polygon, you can deposit USDC in one step, and deposits from other networks are supported via Circle CCTP. Learn more.
+
+    <img height="200" src="/images/1Balance.png" />
+
+  </Step>
+</Steps>

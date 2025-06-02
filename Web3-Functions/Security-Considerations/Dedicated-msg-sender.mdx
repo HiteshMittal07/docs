@@ -2,9 +2,6 @@
 title: Dedicated msg.sender
 ---
 
-# Security Considerations
-
-## Dedicated msg.sender
 For security reasons, during task creation, you will see an address which will be the msg.sender for your task executions.
 
 <img src="/images/security_considerations.png" alt="Web3 Security Considerations" />
@@ -15,11 +12,11 @@ If you are the owner of the target contract in question, it's recommended to imp
 
 <img src="/images/web3_security_considerations.png" alt="Security Considerations" />
 
-> **Important:** msg.sender restrictions should be added to the function that Gelato will call during execution, not the checker function. Learn more about it here: [#1.-understand-the-role-of-a-checker](/Web3-Functions/Security-Considerations/Understand-the-role-of-a-checker)
+> **Important:** msg.sender restrictions should be added to the function that Gelato will call during execution, not the checker function. Learn more about it here: [#1.-understand-the-role-of-a-checker](/Web3-Functions/How-To-Guides/Write-solidity-functions#1-understand-the-role-of-a-checker)
 
-You can have this restriction by inheriting AutomateReady
+You can have this restriction by inheriting [AutomateReady](https://github.com/gelatodigital/automate/blob/master/contracts/integrations/AutomateReady.sol).
 
-AutomateReady exposes a modifier onlyDedicatedMsgSender which restricts msg.sender to only task executions created by taskCreator defined in the constructor.
+```AutomateReady``` exposes a modifier ```onlyDedicatedMsgSender``` which restricts ```msg.sender``` to only task executions created by ```taskCreator``` defined in the constructor.
 
 ```solidity
 modifier onlyDedicatedMsgSender() {

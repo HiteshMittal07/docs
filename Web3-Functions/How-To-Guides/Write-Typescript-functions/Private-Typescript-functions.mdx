@@ -2,20 +2,19 @@
 title: Private Typescript Functions
 ---
 
-# Private Typescript Functions
-
 ## Deployed Typescript Functions are public
 When you deploy a Typescript Function the code is stored and pinned on IPFS making it accessible to everyone. If you would prefer to conceal your code, one approach is to store your code in a private Github Gist. Subsequently, this code can be retrieved and executed through a Web3 Function.
 
 > **Note:** this approach introduces a dependency on Github's availability. We aim to directly support private Web3 Function deployments in the future.
 
 ## Private Typescript Function example
-This Typescript Function fetches `onRun.js` (Github gist containing concealed code) with its gist id and executes it during runtime. Check out the example on [GitHub](https://github.com/your-repo-link) here.
+This Typescript Function fetches `onRun.js` (Github gist containing concealed code) with its gist id and executes it during runtime. Check out the example on [GitHub](https://github.com/gelatodigital/web3-functions-template/blob/master/web3-functions/private/README.md) here.
 
+<Warning>
 The code in `onRun.js` must be in JavaScript
+</Warning>
 
-### private-w3f/index.ts
-```typescript
+```typescript private-w3f/index.ts
 import {
   Web3Function,
   Web3FunctionContext,
@@ -95,7 +94,7 @@ Check out an example of a GitHub gist with `onRun.js` [here](https://gist.github
 ### 1. onRun.js file structure
 `onRun.js` should return a promise.
 
-```javascript
+```javascript onRun.js
 return (async () => {
   // ... your code here
 })();
@@ -139,13 +138,14 @@ return {
 ### Secrets (strict)
 - `GIST_ID` (Github gist id to fetch onRun.js from)
 
+<Warning>
 Make sure to store your GitHub gist id as a secret.
+</Warning>
 
 ### Arguments (not strict)
 Since GitHub gists are editable, you can have a userArgs to be a JSON string so that arguments can be editable without re-deploying a web3 function with a different schema.
 
-#### private-w3f/schema.json
-```json
+```json private-w3f/schema.json
 {
   "web3FunctionVersion": "2.0.0",
   "runtime": "js-1.0",

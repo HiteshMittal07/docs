@@ -2,14 +2,13 @@
 title: Security Considerations
 ---
 
-# Security Considerations
-
+<Tip>
 After reading this page you will:
 
 - Understand the importance of security measures when implementing Gelato VRF in your dApp.
 - Recognize the need for state locking to prevent front-running and maintain the integrity of the randomization process.
 - Learn the benefits of using RNGLib to ensure the randomness you receive is unique and secure, particularly when handling multiple requests simultaneously.
-
+</Tip>
 ## Important Note
 
 > Contrary to some other VRF providers, Gelato VRF is verifiable off-chain but not on-chain. This is due to the nature of the BLS signatures used by Drand network, which are not yet supported at EVM level. With the upcoming EIP-2537 release, adding BLS precompile for BLS12-381 curve, we aim to add support for on-chain randomness verification in a near future on all networks that will include this precompile.

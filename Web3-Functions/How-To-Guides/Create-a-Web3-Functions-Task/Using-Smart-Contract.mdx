@@ -2,8 +2,6 @@
 title: Using Smart Contract
 ---
 
-
-# Using a Smart contract
 You can create a task that uses Web3 Function from your smart contract as well.
 
 If your project involves complex interactions and you need the task creation to be a part of an on-chain transaction, you would directly interact with a smart contract.
@@ -12,7 +10,7 @@ If your project involves complex interactions and you need the task creation to 
 
 To create a Web3 Function task with your smart contract, you can inherit AutomateTaskCreator which has helper functions to easily create your task. 
 
-Pass the Module.PROXY & Module.WEB3_FUNCTION as modules in ModuleData
+Pass the `Module.PROXY` & `Module.WEB3_FUNCTION` as modules in `ModuleData`
 
 ```solidity
 ModuleData memory moduleData = ModuleData({
@@ -24,7 +22,7 @@ moduleData.modules[0] = Module.PROXY;
 moduleData.modules[1] = Module.WEB3_FUNCTION;
 ```
 
-Use _web3FunctionModuleArg to encode arguments for WEB3_FUNCTION module. 
+Use `_web3FunctionModuleArg` to encode arguments for `WEB3_FUNCTION` module. 
 
 ```solidity
 function _web3FunctionModuleArg(
@@ -33,12 +31,12 @@ function _web3FunctionModuleArg(
 ) 
 ```
 
-Here is how you can encode your Web3Function arguments to get web3FunctionArgsHex.
+Here is how you can encode your Web3Function arguments to get `web3FunctionArgsHex`.
 
-In this example, the Web3Function has 2 arguments, counterW3fAddress & count . 
+In this example, the Web3Function has 2 arguments, `counterW3fAddress` & `count`. 
 
-schema.json
-```json
+
+```json schema.json
 {
   "web3FunctionVersion": "2.0.0",
   "runtime": "js-1.0",
@@ -51,7 +49,7 @@ schema.json
 }
 ```
 
-In your contract, you would encode the arguments according to the sequence defined in schema.json .
+In your contract, you would encode the arguments according to the sequence defined in `schema.json`.
 
 ```solidity
 function _getWeb3FunctionArgsHex(
@@ -65,7 +63,7 @@ returns (bytes memory web3FunctionArgsHex) {
 }
 ```
 
-The full code can be found here.
+The full code can be found [here](https://github.com/gelatodigital/automate/blob/master/contracts/integrations/examples/contractCreator/withTreasury/CounterWeb3Function.sol).
 
 ```solidity
 function createTask(
@@ -104,11 +102,11 @@ function createTask(
 ## Additional Info
 - Tasks created via this route cannot be named
 - Smart Contracts can also create and cancel tasks
-- You can find a list of example smart contracts here
+- You can find a list of example smart contracts [here](https://github.com/gelatodigital/automate/tree/master/contracts/integrations/examples)
 
-## Functions Exposed by AutomateTaskCreator
+## Functions Exposed by `AutomateTaskCreator`
 
-### _createTask()
+### `_createTask()`
 Interacts and creates a task on the Gelato Automate smart contract.
 
 ```solidity
@@ -120,12 +118,12 @@ function _createTask(
 ) internal returns (bytes32 taskId);
 ```
 
-- execAddress - Address of the contract which Gelato will call
-- execDataOrSelector - Signature of function which Gelato will call / execution data (If Resolver Module is not used. More about modules below)
-- moduleData - Modules that are enabled for the task. (More about ModuleData below)
-- feeToken - Use address(0) if using Gelato 1balance. Use 0xeeeeee... for ETH or native tokens.
+- `execAddress` - Address of the contract which Gelato will call
+- `execDataOrSelector` - Signature of function which Gelato will call / execution data (If Resolver Module is not used. More about modules below)
+- `moduleData` - Modules that are enabled for the task. (More about ModuleData below)
+- `feeToken` - Use address(0) if using Gelato 1balance. Use 0xeeeeee... for ETH or native tokens.
 
-### ModuleData
+### `ModuleData`
 ```solidity
 struct ModuleData {
     Module[] modules;
@@ -145,12 +143,12 @@ enum Module {
 }
 ```
 
-- RESOLVER - Define dynamic conditions and execution data
-- TIME - Repeated execution at a specific time and interval. (in ms)
-- PROXY - Your function will be called by a dedicated msg.sender
-- SINGLE_EXEC - Task is cancelled after one execution
-- WEB3_FUNCTION - Define a Typescript function to get off-chain execution data
-- TRIGGER - Define your execution trigger (Time interval, Event, every block, ...)
+- `RESOLVER` - Define dynamic conditions and execution data
+- `TIME` - Repeated execution at a specific time and interval. (in ms)
+- `PROXY` - Your function will be called by a dedicated msg.sender
+- `SINGLE_EXEC` - Task is cancelled after one execution
+- `WEB3_FUNCTION` - Define a Typescript function to get off-chain execution data
+- `TRIGGER` - Define your execution trigger (Time interval, Event, every block, ...)
 
 Each Module would require additional arguments which is an encoded data.
 
@@ -178,7 +176,7 @@ function _eventTriggerModuleArg(
 ) internal pure returns (bytes memory)
 ```
 
-Crafting ModuleData will look like this if we want to create a task which utilise RESOLVER, PROXY & SINGLE_EXEC Module.
+Crafting `ModuleData` will look like this if we want to create a task which utilise `RESOLVER`, `PROXY` & `SINGLE_EXEC` Module.
 
 ```solidity
 ModuleData memory moduleData = ModuleData({
@@ -197,17 +195,18 @@ moduleData.args[0] = _resolverModuleArg(
 moduleData.args[1] = _proxyModuleArg();
 moduleData.args[2] = _singleExecModuleArg();
 ```
+<Warning>
+`Module[]` must follow the order `RESOLVER`, `PROXY`, `SINGLE_EXEC`, `WEB3_FUNCTION`, `TRIGGER`
+</Warning>
 
-Module[] must follow the order RESOLVER, PROXY, SINGLE_EXEC, WEB3_FUNCTION, TRIGGER
-
-### _cancelTask()
+### `_cancelTask()`
 Cancels a task owned by the smart contract.
 
 ```solidity
 function _cancelTask(bytes32 _taskId) internal
 ```
 
-### onlyDedicatedMsgSender
+### `onlyDedicatedMsgSender`
 Function modifier to restrict msg.sender to only task executions created by taskCreator (defined in constructor). Learn more about it at [Security Considerations](/Web3-Functions/Security-Considerations/Dedicated-msg-sender)
 
 ```solidity
@@ -217,7 +216,7 @@ modifier onlyDedicatedMsgSender() {
 }
 ```
 
-### _depositFunds1Balance()
+### `_depositFunds1Balance()`
 ```solidity
 function _depositFunds1Balance(
     uint256 _amount,
@@ -228,7 +227,7 @@ function _depositFunds1Balance(
 
 Deposit funds into the Gelato 1balance contract.
 
-> **Note:** The _depositFunds1Balance method is only available on Polygon
+> **Note:** The `_depositFunds1Balance` method is only available on Polygon
 
 ## Single Execution Task
 If you want to have Gelato call your function only once. If so, you can Include SingleExec module in ModuleData.modules. Check out the full code here.

@@ -1,0 +1,359 @@
+---
+title: Getting Started
+---
+
+Watch Now: Learn more by watching our video [Supercharge your Web3 Function](https://www.youtube.com/watch?v=Qy-6eERrbKA), available on YouTube.
+
+## Installation
+
+<CodeGroup>
+```bash npm
+npm install @gelatonetwork/web3-functions-sdk
+```
+
+```bash yarn
+yarn add @gelatonetwork/web3-functions-sdk
+```
+</CodeGroup>
+Or you can use the [template](https://github.com/gelatodigital/web3-functions-hardhat-template) directly from GitHub's UI.
+
+## Configuration
+
+Create a `.env` file in your project root with the following variables:
+
+```env
+PROVIDER_URLS=your_provider_rpc_url
+PRIVATE_KEY=your_private_key  # Optional, only needed for CLI deployment
+```
+
+## Typescript Function Example
+
+This typescript function updates an oracle smart contract with data returned by Coingecko's price API at an interval. Check out more examples [here](https://github.com/gelatodigital/web3-functions-examples).
+
+```typescript
+import { Web3Function, Web3FunctionContext } from "@gelatonetwork/web3-functions-sdk";
+import { Contract, ethers } from "ethers";
+import ky from "ky"; // we recommend using ky as axios doesn't support fetch by default
+
+const ORACLE_ABI = [
+  "function lastUpdated() external view returns(uint256)",
+  "function updatePrice(uint256)",
+];
+
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { userArgs, gelatoArgs, multiChainProvider } = context;
+  const provider = multiChainProvider.default();
+
+  // Retrieve Last oracle update time
+  const oracleAddress = "0x71b9b0f6c999cbbb0fef9c92b80d54e4973214da";
+  const oracle = new Contract(oracleAddress, ORACLE_ABI, provider);
+  const lastUpdated = parseInt(await oracle.lastUpdated());
+  console.log(`Last oracle update: ${lastUpdated}`);
+
+  // Check if it's ready for a new update
+  const nextUpdateTime = lastUpdated + 300; // 5 min
+  const timestamp = (await provider.getBlock("latest")).timestamp;
+  console.log(`Next oracle update: ${nextUpdateTime}`);
+  if (timestamp < nextUpdateTime) {
+    return { canExec: false, message: `Time not elapsed` };
+  }
+
+  // Get current price on coingecko
+  const currency = "ethereum";
+  const priceData: any = await ky
+    .get(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${currency}&vs_currencies=usd`,
+      { timeout: 5_000, retry: 0 }
+    )
+    .json();
+  const price = Math.floor(priceData[currency].usd);
+  console.log(`Updating price: ${price}`);
+
+  // Return execution call data
+  return {
+    canExec: true,
+    callData: [{
+      to: oracleAddress,
+      data: oracle.interface.encodeFunctionData("updatePrice", [price])
+    }],
+  };
+});
+```
+
+Create your function `schema.json` to specify your runtime configuration:
+
+```json
+{
+  "web3FunctionVersion": "2.0.0",
+  "runtime": "js-1.0",
+  "memory": 128,
+  "timeout": 30,
+  "userArgs": {}
+}
+```
+
+Note: For now the configuration is fixed and cannot be changed.
+
+## Typescript Function Context
+
+When writing the Web3 Function, it is very helpful to understand the context Gelato injects into the execution, providing additional features to widen the Web3 Functions applicability.
+
+```typescript
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { userArgs, storage, secrets, multiChainProvider, gelatoArgs } = context;
+  const provider = multiChainProvider.default();
+  ...
+});
+```
+
+### User Arguments
+
+Declare your expected userArgs in your schema.json, accepted types are string, string[], number, number[], boolean, boolean[]:
+
+```json
+{
+  "web3FunctionVersion": "2.0.0",
+  "runtime": "js-1.0",
+  "memory": 128,
+  "timeout": 30,
+  "userArgs": {
+    "currency": "string",
+    "oracle": "string"
+  }
+}
+```
+
+Access your userArgs from the Web3Function context:
+
+```typescript
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { userArgs, gelatoArgs, secrets } = context;
+
+  // User args:
+  console.log('Currency:', userArgs.currency)
+  console.log('Oracle:', userArgs.oracle)
+  ...
+});
+```
+
+In the same directory as your web3 function, create a file `userArgs.json` and fill in your userArgs to test your web3 function:
+
+```json
+{
+  "currency": "ethereum",
+  "oracle": "0x71B9B0F6C999CBbB0FeF9c92B80D54e4973214da"
+}
+```
+
+Test out the Coingecko oracle web3 function:
+
+```bash
+npx w3f test path/to/web3-functions/oracle/index.ts --logs
+```
+
+### State / Storage
+
+Web3Functions are stateless scripts, that will run in a new & empty memory context on every execution. If you need to manage some state variable, we provide a simple key/value store that you can access from your web3 function context.
+
+See the above example to read & update values from your storage:
+
+```typescript
+import {
+  Web3Function,
+  Web3FunctionContext,
+} from "@gelatonetwork/web3-functions-sdk";
+
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { storage, multiChainProvider } = context;
+  const provider = multiChainProvider.default();
+
+  // Use storage to retrieve previous state (stored values are always string)
+  const lastBlockStr = (await storage.get("lastBlockNumber")) ?? "0";
+  const lastBlock = parseInt(lastBlockStr);
+  console.log(`Last block: ${lastBlock}`);
+
+  const newBlock = await provider.getBlockNumber();
+  console.log(`New block: ${newBlock}`);
+  if (newBlock > lastBlock) {
+    // Update storage to persist your current state (values must be cast to string)
+    await storage.set("lastBlockNumber", newBlock.toString());
+  }
+
+  return {
+    canExec: false,
+    message: `Updated block number: ${newBlock.toString()}`,
+  };
+});
+```
+
+To populate the storage values in your testing, in the same directory as your web3 function, create a file `storage.json` and fill in the storage values:
+
+```json
+{
+  "lastBlockNumber": "1000"
+}
+```
+
+Test out the storage web3 function:
+
+```bash
+npx w3f test path/to/web3-functions/storage/index.ts --logs
+```
+
+### Secrets
+
+In the same directory as your web3 function, create a `.env` file and fill up your secrets:
+
+```env
+COINGECKO_API=https://api.coingecko.com/api/v3
+```
+
+Access your secrets from the Web3Function context:
+
+```typescript
+// Get api from secrets
+const coingeckoApi = await context.secrets.get("COINGECKO_API");
+if (!coingeckoApi) {
+  return { canExec: false, message: `COINGECKO_API not set in secrets` };
+}
+```
+
+Test your web3 function using secrets:
+
+```bash
+npx w3f test path/to/web3-functions/secrets/index.ts --logs
+```
+
+When deploying a task, you will be able to set your web3 function secrets on our UI or using the SDK:
+
+```typescript
+import hre from "hardhat";
+import { AutomateSDK, Web3Function } from "@gelatonetwork/automate-sdk";
+
+const { ethers, w3f } = hre;
+
+const adBoardW3f = w3f.get("advertising-board");
+
+const [deployer] = await ethers.getSigners();
+const chainId = (await ethers.provider.getNetwork()).chainId;
+
+const automate = new AutomateSDK(chainId, deployer);
+const web3Function = new Web3Function(chainId, deployer);
+
+// Deploy Web3Function on IPFS
+console.log("Deploying Web3Function on IPFS...");
+const cid = await adBoardW3f.deploy();
+console.log(`Web3Function IPFS CID: ${cid}`);
+
+// Create task using automate sdk
+console.log("Creating automate task...");
+
+const { taskId, tx } = await automate.createBatchExecTask({
+  name: "Web3Function - Ad Board",
+  web3FunctionHash: cid,
+  web3FunctionArgs: {},
+});
+
+await tx.wait();
+console.log(`Task created, taskId: ${taskId} (tx hash: ${tx.hash})`);
+console.log(
+  `> https://beta.app.gelato.network/task/${taskId}?chainId=${chainId}`
+);
+
+// Set task specific secrets
+const secrets = adBoardW3f.getSecrets();
+if (Object.keys(secrets).length > 0) {
+  await web3Function.secrets.set(secrets, taskId);
+  console.log(`Secrets set`);
+}
+```
+
+### Multichain Provider
+
+The `multichainProvider` allows us to instantiate RPC providers for every network Gelato is deployed on.
+
+```typescript
+import {
+  Web3Function,
+  Web3FunctionContext,
+} from "@gelatonetwork/web3-functions-sdk";
+
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { multiChainProvider } = context;
+
+  // multichainProvider.default() will instantiate
+  // the provider of the chain the W3F is deployed
+  const provider = multiChainProvider.default();
+ 
+  // passing the chainId as follows, we can instantiate
+  // a rpc provider for that network
+  const polygonProvider = multiChainProvider.chainId(137);
+  
+  // This method fetches the number of remaining RPC calls,
+  // allowing dynamic adaptations based on the user's plan limits.
+  const remainingCalls = await multiChainProvider.nbRpcCallsRemaining();
+  ...
+});
+```
+
+When testing locally, we can provide the different providers by including them in `.env` at the root folder:
+
+```env
+PROVIDER_URLS=RPC1,RPC2
+```
+
+#### Interoperability with Other Libraries
+
+Although `multiChainProvider` is designed to work seamlessly within the Gelato Web3 Functions SDK, it is possible to extract the underlying RPC URL and use it with other client libraries. This flexibility is valuable for developers who prefer or require features from other libraries, such as `viem`.
+
+Here's an example of how to utilize the RPC URL from `multiChainProvider` with the `viem` library:
+
+```typescript
+import { createPublicClient, http } from "viem";
+import { polygon } from "viem/chains";
+
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { multiChainProvider } = context;
+  const provider = multiChainProvider.default();
+  const url = provider.connection.url;
+
+  // Initialize viem client with the extracted URL
+  const rpc = createPublicClient({
+    chain: polygon,
+    transport: http(url),
+  });
+  
+  // Now you can use the viem client for your operations
+  // ...
+});
+```
+
+### Gelato Arguments
+
+Gelato injects the `chainId`, the `gasPrice`, and the `taskId` into the context.
+
+- **chainId:** The unique number identifying the blockchain network where the function is running.
+- **gasPrice:** The cost of executing transactions on the blockchain.
+- **taskId:** A string that uniquely identifies the task.
+
+```typescript
+import {
+  Web3Function,
+  Web3FunctionContext,
+} from "@gelatonetwork/web3-functions-sdk";
+
+Web3Function.onRun(async (context: Web3FunctionContext) => {
+  const { gelatoArgs } = context;
+
+  // chainId: number
+  const chainId = gelatoArgs.chainId;
+
+  // gasPrice: BigNumber
+  const gasPrice = gelatoArgs.gasPrice;
+  
+  // taskId: string
+  const taskId = gelatoArgs.taskId;
+  ...
+});
+```
+

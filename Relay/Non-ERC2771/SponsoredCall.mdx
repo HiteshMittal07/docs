@@ -1,19 +1,18 @@
 ---
 title: SponsoredCall
+description: Permissionless sponsored transactions
 ---
 
-# SponsoredCall
-
-Permissionless sponsored transactions
-
+<Tip>
 After reading this page:
 
 - You'll know how to use the SponsoredCall SDK method. This uses the 1Balance payment method, allowing you to sponsor some/all of your user's gas costs.
 - You'll see some code which will help you send a relay request within minutes.
+</Tip>
 
-> **Important:** Please proceed to our [Security Considerations](/relay/security) page and read it thoroughly before advancing with your implementation. It is crucial to understand all potential security risks and measures to mitigate them.
+<Warning>Please proceed to our [Security Considerations](/relay/security) page and read it thoroughly before advancing with your implementation. It is crucial to understand all potential security risks and measures to mitigate them.</Warning>
 
-> **Note:** The nature of sponsoredCall is permissionless and does not enforce any security. Target contracts should not whitelist the calling contract as an authorized msg.sender. The contract address is subject to change without further notice.
+<Warning>The nature of `sponsoredCall` is permissionless and does not enforce any security. Target contracts should not whitelist the calling contract as an authorized `msg.sender`. The contract address is subject to change without further notice.</Warning>
 
 ## Overview
 

@@ -1,26 +1,25 @@
 ---
-title: SponsoredCallERC2771
+title: "SponsoredCall ERC-2771"
+description: Sponsored transactions with ERC2771 authentication support
 ---
 
-# SponsoredCallERC2771
+<Warning>If you plan to use ERC-2771 with a `multicall` method or any other method using `delegateCall()`, please read carefully the section [Avoid ERC-2771-risks](/relay/security/erc2771-delegatecall-vulnerability).</Warning>
 
-Sponsored transactions with ERC2771 authentication support
+<Warning>If you are using `@gelatonetwork/relay-sdk` v3 or contracts from the package `@gelatonetwork/relay-context` v2, please follow this [migration guide](/relay/migration) to migrate to the new versions.</Warning>
 
-> **Note:** If you plan to use ERC-2771 with a multicall method or any other method using delegateCall(), please read carefully the section [Avoid ERC-2771-risks](/relay/security/erc2771-delegatecall-vulnerability).
-
-> **Note:** If you are using @gelatonetwork/relay-sdk v3 or contracts from the package @gelatonetwork/relay-context v2, please follow this [migration guide](/relay/migration) to migrate to the new versions.
-
+<Tip>
 After reading this page:
 
-- You'll know how to use the sponsoredCallERC2771 SDK method. This will give your user's a gasless UX requiring a user signature. This uses the 1Balance payment method, allowing you to sponsor some/all of your user's gas costs.
-- You'll learn about how to incorporate ERC2771Context into your contract for _msgSender() support.
+- You'll know how to use the `sponsoredCallERC2771` SDK method. This will give your user's a gasless UX requiring a user signature. This uses the 1Balance payment method, allowing you to sponsor some/all of your user's gas costs.
+- You'll learn about how to incorporate `ERC2771Context` into your contract for `_msgSender()` support.
 - You'll see some code which will help you send a relay request within minutes.
+</Tip>
 
 ## Overview
 
-The sponsoredCallERC2771 method uses both a sponsor API key and a user's signature, like that from MetaMask, to securely sponsor gasless transactions. Payments are made via the Gelato 1Balance method.
+The `sponsoredCallERC2771` method uses both a sponsor API key and a user's signature, like that from MetaMask, to securely sponsor gasless transactions. Payments are made via the Gelato 1Balance method.
 
-Gelato Relay SDK has various methods for handling sponsored ERC2771 transactions. The most straightforward is sponsoredCallERC2771, which handles both signing and sending in one step. If you need to separate these processes, other SDK methods are available.
+Gelato Relay SDK has various methods for handling sponsored ERC2771 transactions. The most straightforward is `sponsoredCallERC2771`, which handles both signing and sending in one step. If you need to separate these processes, other SDK methods are available.
 
 ## SDK Methods
 

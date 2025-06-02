@@ -1,15 +1,14 @@
 ---
 title: Gelato's Fee Oracle
+description: How to get a quote for your relay fee before sending the request
 ---
 
-# Gelato's Fee Oracle
-
-How to get a quote for your relay fee before sending the request
-
+<Tip>
 After reading this page:
 
 - You'll understand how to query the fee oracle using either the SDK or the API directly and which methods/endpoints are available.
 - You'll learn the difference between different fee modalities and trade offs: for example, allowing your user to sign off on a maximum fee they are willing to pay helping account for gas volatility, or allowing them to sign off on the exact fee but with a higher risk of non-execution.
+</Tip>
 
 You can query our fee oracle before the relay request to get an overall estimated fee (gas costs + Gelato fee) for your relay request.
 

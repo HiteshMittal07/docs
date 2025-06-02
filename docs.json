@@ -26,14 +26,14 @@
           {
             "group": "Products",
             "pages": [
-              "Smart-Wallets",
-              "Rollup-as-a-Service",
-              "RPC-Nodes",
-              "Web3-Functions",
-              "Relay",
-              "VRF",
-              "Oracles",
-              "1Balance"
+              "/Smart-Wallets",
+              "/Rollup-as-a-Service",
+              "/RPC-Nodes",
+              "/Web3-Functions",
+              "/Relay",
+              "/VRF",
+              "/Oracles",
+              "/1Balance"
             ]
           },
           {
@@ -197,6 +197,7 @@
               {
                 "group": "Write Typescript Functions",
                 "pages": [
+                  "Web3-Functions/How-To-Guides/Write-Typescript-functions/Getting-Started",
                   "Web3-Functions/How-To-Guides/Write-Typescript-functions/Event-Trigger",
                   "Web3-Functions/How-To-Guides/Write-Typescript-functions/Private-Typescript-functions",
                   "Web3-Functions/How-To-Guides/Write-Typescript-functions/Callbacks"
@@ -226,7 +227,7 @@
             "group": "Introduction",
             "pages": [
               "Relay/Introduction/Overview",
-              "Relay/Introduction/What-is-Relaying?"
+              "Relay/Introduction/What-is-Relaying"
             ]
           },
           {
@@ -250,15 +251,28 @@
           {
             "group": "ERC-2771 (Recommended)",
             "pages": [
+              "Relay/ERC2771-Recommended/Overview",
               "Relay/ERC2771-Recommended/SponsoredCall-ERC2771",
-              "Relay/ERC2771-Recommended/CallwithSyncFee-ERC2771"
+              {
+                "group": "CallwithSyncFee ERC-2771",
+                "pages": [
+                  "Relay/ERC2771-Recommended/CallwithSyncFee-ERC2771/Overview",
+                  "Relay/ERC2771-Recommended/CallwithSyncFee-ERC2771/Relay-Context-Contract-ERC-2771"
+                ]
+              }
             ]
           },
           {
             "group": "Non-ERC2771",
             "pages": [
               "Relay/Non-ERC2771/SponsoredCall",
-              "Relay/Non-ERC2771/CallwithSyncFee"
+              {
+                "group": "CallwithSyncFee",
+                "pages": [
+                  "Relay/Non-ERC2771/CallwithSyncFee/Overview",
+                  "Relay/Non-ERC2771/CallwithSyncFee/Relay-Context-Contract"
+                ]
+              }
             ]
           },
           {
