@@ -2,4 +2,251 @@
 title: Allow your target contract to pay for gas
 ---
 
-TODO!!!
+# Non-Sponsored Calls
+
+Non-Sponsored calls are also known as Sync fee Calls. It is the simplest way to pay, but it delegates all security (reentrancy/replay protection etc.) and payment logic to the target smart contract. You can use ERC-2771 to achieve out-of-the-box security and authentication. Relay costs are covered in either native or ERC-20 tokens and they are paid synchronously during the relay call. 
+
+## Implementation Steps
+
+### 1. Deploy a GelatoRelayContext compatible contract
+Import GelatoRelayContext in your target contract to inherit callWithSyncFee functionalities.
+
+```solidity
+import {
+    GelatoRelayContext
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
+
+contract TargetContract is GelatoRelayContext {
+
+    function example() external onlyGelatoRelay {
+        // _yourAuthenticationLogic()
+
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        _transferRelayFee();
+    }
+
+    function exampleFeeCapped(uint256 maxFee) external onlyGelatoRelay {
+        // Remember to autheticate your call since you are not using ERC-2771
+        // _yourAuthenticationLogic()
+
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        _transferRelayFeeCapped(maxFee);
+    }
+}
+```
+
+#### For ERC2771 Sync Fee Calls (Recommended)
+Import GelatoRelayContextERC2771 in your target contract to inherit ERC2771 functionalities with callWithSyncFee. Learn more about ERC2771 here.
+
+```solidity
+import {
+    GelatoRelayContextERC2771
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContextERC2771.sol";
+
+contract TargetContractRelayContextERC2771 is GelatoRelayContextERC2771 {
+
+    mapping (address=>bool) public caller;
+
+    function increment() external onlyGelatoRelayERC2771 {
+
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelayERC2771 modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        _transferRelayFee();
+        // _getMsgSender() will fetch the original user who signed the relay request.
+        caller[_getMsgSender()] = true;
+    }
+    
+    function incrementFeeCapped(uint256 maxFee) external onlyGelatoRelayERC2771 {
+
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelayERC2771 modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+  
+        _transferRelayFeeCapped(maxFee);
+        // _getMsgSender() will fetch the original user who signed the relay request.
+        caller[_getMsgSender()] = true;
+    }
+}
+```
+
+### 2. Import GelatoRelaySDK into your front-end .js project
+
+```javascript
+import { GelatoRelay, CallWithSyncFeeRequest } from "@gelatonetwork/relay-sdk";
+const relay = new GelatoRelay();
+```
+
+or
+
+If you're using the Viem library in your project, consider importing @gelatonetwork/relay-sdk-viem.
+
+```javascript
+import { GelatoRelay, CallWithSyncFeeRequest } from "@gelatonetwork/relay-sdk-viem";
+const relay = new GelatoRelay();
+```
+
+#### For ERC2771 Sync Fee Calls
+
+```javascript
+import { GelatoRelay, CallWithSyncFeeERC2771Request } from "@gelatonetwork/relay-sdk-viem";
+```
+
+Once we have imported the GelatoRelay class, when using ERC2771 methods, we must initialize it with the appropriate trustedForwarder. 
+The possible configurations are: 
+
+```javascript
+contract: {
+    relay1BalanceERC2771: "trustedForwarder for method sponsoredCallERC2771",
+    relayERC2771: "trustedForwarder for method callWithSyncFeeERC2771",
+    relay1BalanceConcurrentERC2771: "trustedForwarder for method concurrent sponsoredCallERC2771",
+    relayConcurrentERC2771:"trustedForwarder for method concurrent callWithSyncFeeERC2771",
+    relay1BalanceConcurrentERC2771zkSync: "trustedForwarder for method concurrent sponsoredCallERC2771 on zkSync",
+    relay1BalanceERC2771zkSync: "trustedForwarder for method sponsoredCallERC2771 on zkSync",
+    relayConcurrentERC2771zkSync: "trustedForwarder for method concurrent callWithSyncFeeERC2771 on zkSync",
+    relayERC2771zkSync: "trustedForwarder for method callWithSyncFeeERC2771 on zkSync",
+}
+```
+
+We will need to go to the Supported Networks and check the network and the contract addresses to identify the trustedForwarder associated with our method.
+In the example below, we are using the method callWithSyncFeeERC2771 on Sepolia, the trustedForwarder associated is 0xb539068872230f20456CF38EC52EF2f91AF4AE49. We will initialize GelatoRelay with the following config:
+
+```javascript
+const relay = new GelatoRelay({
+    contract: {
+        relayERC2771:"0xb539068872230f20456CF38EC52EF2f91AF4AE49"
+    }
+});
+```
+
+### 3. Generate a payload for your target contract
+Note: The code below uses the Ethers library. Alternatively, if you want to use the services with Viem, check here.
+
+```javascript
+// set up target address and function signature abi
+const targetContractAddress = "<your target contract address>"; 
+const abi = ["function example()","function exampleFeeCapped(uint256)"];
+
+const [address] = await window.ethereum!.request({
+      method: "eth_requestAccounts",
+ });
+
+// generate payload using front-end provider such as MetaMask
+const client = createWalletClient({
+      account: address,
+      chain,
+      transport: custom(window.ethereum!),
+});
+
+// address of the token to pay fees
+const feeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+
+const chainId = await client.getChainId();
+
+//encode function data
+const data = encodeFunctionData({
+    abi: abi,
+    functionName: "example",
+});
+
+// -----------------------------------------------------------------
+// the following is an alternative example using Gelato Fee Oracle, 
+// setting maxFee, and calling the exampleFeeCapped(maxFee) method
+
+// retrieve the estimate fee from the Gelato 
+const fee = await relay.getEstimatedFee(
+  BigInt(chainId),
+  feeToken,
+  gasLimit,
+  false,
+)
+
+const maxFee = fee * 2 // you can use 2x or 3x to set your maxFee
+
+//encode function data
+const data = encodeFunctionData({
+    abi: abi,
+    functionName: "exampleFeeCapped",
+    args : [maxFee]
+});
+```
+
+### 4. Send payload to Gelato
+
+```javascript
+// populate the relay SDK request body
+const request: CallWithSyncFeeRequest = {
+  chainId: BigInt(chainId),
+  target: targetContractAddress,
+  data: data,
+  feeToken: feeToken,
+  isRelayContext: true,
+};
+  
+// send relayRequest to Gelato Relay API
+const relayResponse = await relay.callWithSyncFee(request);
+
+// -----------------------------------------------------------------
+// the following is an alternative example using Gelato Fee Oracle, 
+// setting maxFee, and calling the exampleFeeCapped(maxFee) method
+
+// populate the relay SDK request body
+const requestMaxFee: CallWithSyncFeeRequest = {
+  chainId: BigInt(chainId),
+  target: targetContractAddress,
+  data: dataMaxFee,
+  feeToken: feeToken,
+  isRelayContext: true,
+};
+  
+// send relayRequest to Gelato Relay API
+const relayResponse = await relay.callWithSyncFee(requestMaxFee);
+```
+
+#### For ERC2771 Sync Fee Calls
+
+```javascript
+// populate the relay SDK request body
+const request: CallWithSyncFeeERC2771Request = {
+  chainId: BigInt(chainId),
+  target: targetContractAddress,
+  data: data,
+  user: address,
+  feeToken: feeToken,
+  isRelayContext: true,
+};
+  
+// send relayRequest to Gelato Relay API
+const relayResponse = await relay.callWithSyncFeeERC2771(request, client as any);
+
+// -----------------------------------------------------------------
+// the following is an alternative example using Gelato Fee Oracle, 
+// setting maxFee, and calling the incrementFeeCapped(maxFee) method
+
+// populate the relay SDK request body
+const requestMaxFee: CallWithSyncFeeERC2771Request = {
+  chainId:  BigInt(chainId),
+  target: targetContractAddress,
+  data: dataMaxFee,
+  user: address,
+  feeToken: feeToken,
+  isRelayContext: true,
+};
+  
+// send relayRequest to Gelato Relay API
+const relayResponseMaxFee = await relay.callWithSyncFeeERC2771(requestMaxFee, client as any);
+```
+
+Learn more about Implementation of Non ERC2771 SyncFee Calls here and ERC2771 SyncFee Calls here.
