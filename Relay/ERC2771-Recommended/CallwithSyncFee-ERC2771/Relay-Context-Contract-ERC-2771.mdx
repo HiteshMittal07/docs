@@ -1,5 +1,163 @@
 ---
-title: Relay Context Contracts ERC-2771
+title: "Using Relay Context Contracts for callWithSyncFeeERC2771"
+description: "Learn how to make your smart contracts compatible with Gelato Relay's callWithSyncFeeERC2771 method using GelatoRelayContextERC2771 and GelatoRelayFeeCollectorERC2771."
 ---
 
-TODO!!!
+This guide explains how to integrate Gelato's relay context contracts to make your smart contracts compatible with the `callWithSyncFeeERC2771` method.
+
+<Warning>
+  If you are using `@gelatonetwork/relay-sdk` v3 or contracts from the package `@gelatonetwork/relay-context` v2, please follow [this migration guide](/Relay/Additional-Resources/ERC2771-Migration-Guide) to migrate to the new versions. Ensure you are using `v3.0.0` or above for `@gelatonetwork/relay-context`.
+</Warning>
+
+After reading this page, you'll understand:
+- How to use helper functions from Gelato's context contracts.
+- How to access `feeCollector`, `feeToken`, `fee`, and `_msgSender` within your target contract.
+
+When using `callWithSyncFeeERC2771`, your target contract must pay Gelato's fee collecting contract during execution. Gelato Relay appends necessary information (fee collector address, fee token, fee amount) to the calldata. Gelato's context contracts provide helper functions to decode this information.
+
+**Key Information Decoded:**
+- `uint256 _getFee()`: The fee amount to pay.
+- `address _getFeeToken()`: The address of the token for fee payment.
+- `address _getFeeCollector()`: The address to send the fee payment.
+- `address _getMsgSender()`: The address of the off-chain signer (the actual user).
+
+<Tip>
+  **Choosing the Right Contract to Inherit:**
+  - **`GelatoRelayContextERC2771`**: Use if your target function needs all four pieces of information (fee, feeToken, feeCollector, _msgSender). This is generally recommended.
+  - **`GelatoRelayFeeCollectorERC2771`**: Use if you only need the `feeCollector` address and `_msgSender` (e.g., if you encode `fee` and `feeToken` in your function parameters, perhaps after querying Gelato's Fee Oracle).
+</Tip>
+
+## Getting Started
+
+### Installing `relay-context`
+
+Install the `@gelatonetwork/relay-context` package (ensure v3.0.0 or above):
+
+<CodeGroup>
+```bash title="npm"
+npm install --save-dev @gelatonetwork/relay-context
+```
+```bash title="yarn"
+yarn add -D @gelatonetwork/relay-context
+```
+</CodeGroup>
+
+### Importing into Your Smart Contract
+
+<CodeGroup>
+```solidity title="For GelatoRelayContextERC2771"
+import {
+    GelatoRelayContextERC2771
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContextERC2771.sol";
+```
+```solidity title="For GelatoRelayFeeCollectorERC2771"
+import {
+    GelatoRelayFeeCollectorERC2771
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayFeeCollectorERC2771.sol";
+```
+</CodeGroup>
+
+## `GelatoRelayContextERC2771`
+
+This contract allows your smart contract to retrieve `feeCollector`, `feeToken`, `fee`, and `_msgSender`.
+
+**Example:**
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
+
+import {
+    GelatoRelayContextERC2771
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContextERC2771.sol";
+
+contract Counter is GelatoRelayContextERC2771 {
+    mapping(address => uint256) public counter;
+
+    event IncrementCounter(address indexed user, uint256 newCount);
+
+    function increment() external onlyGelatoRelayERC2771 {
+        _transferRelayFee();
+        address user = _getMsgSender();
+        counter[user] += 1;
+        emit IncrementCounter(user, counter[user]);
+    }
+}
+```
+
+**Features Inherited from `GelatoRelayContextERC2771`:**
+
+1.  **Verifying the Caller:**
+    *   `onlyGelatoRelayERC2771` (modifier)
+    *   `_isGelatoRelay(address _forwarder)` (function)
+
+2.  **Decoding Calldata:**
+    *   `_getFeeCollector()`
+    *   `_getFee()`
+    *   `_getFeeToken()`
+    *   `_getMsgSender()`
+    *   `_getMsgData()`
+
+3.  **Transferring Fees to Gelato:**
+    *   `_transferRelayFee()`
+    *   `_transferRelayFeeCapped(uint256 _maxFee)`
+
+## `GelatoRelayFeeCollectorERC2771`
+
+Inherit this if you only need `feeCollector` and `_msgSender`.
+
+**`GelatoRelayFeeCollectorERC2771` Integration Example:**
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {
+    GelatoRelayFeeCollectorERC2771
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayFeeCollectorERC2771.sol";
+
+contract CounterWithManualFee is GelatoRelayFeeCollectorERC2771 {
+    using SafeERC20 for IERC20;
+    using Address for address payable;
+
+    address public constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    mapping(address => uint256) public counter;
+
+    event IncrementCounterWithFee(address indexed user, uint256 newCount, uint256 feePaid);
+
+    function incrementWithFee(uint256 fee, address feeToken) external onlyGelatoRelayERC2771 {
+        address feeCollector = _getFeeCollector();
+        _transferCustomFee(feeToken, feeCollector, fee);
+        address user = _getMsgSender();
+        counter[user] += 1;
+        emit IncrementCounterWithFee(user, counter[user], fee);
+    }
+
+    function _transferCustomFee(
+        address _token,
+        address _to,
+        uint256 _amount
+    ) internal {
+        if (_amount == 0) return;
+        if (_token == NATIVE_TOKEN) {
+            payable(_to).sendValue(_amount);
+        } else {
+            IERC20(_token).safeTransfer(_to, _amount);
+        }
+    }
+}
+```
+
+**Features Inherited from `GelatoRelayFeeCollectorERC2771`:**
+
+1.  **Verifying the Caller:**
+    *   `onlyGelatoRelayERC2771` (modifier)
+    *   `_isGelatoRelay(address _forwarder)` (function)
+
+2.  **Decoding Calldata:**
+    *   `_getFeeCollector()`
+    *   `_getMsgSender()`
+    *   `_getMsgData()`
+```
