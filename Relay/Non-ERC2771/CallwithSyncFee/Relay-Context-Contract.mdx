@@ -3,4 +3,220 @@ title: Relay Context Contracts
 description: How to use the Relay Context Contract
 ---
 
-TODO!!!
+# Getting your smart contracts compatible with Gelato Relay's callWithSyncFee
+
+After reading this page: 
+
+You'll learn how to use our helper functions to get useful information from directly within your target contract. 
+
+These allow you access to the feeCollector, feeToken address , and fee amount from within your target contract.
+
+When using callWithSyncFee, you need to pay Gelato's fee collecting contract when your target function is called, otherwise your relay request will not execute. To carry out this payment, your target contract needs to know the address of the fee collector so that you can transfer funds during the call. Furthermore, you need to know in what token to pay the fee in, and how much to pay the fee collector. 
+
+Gelato Relay appends this useful information to the end of the calldata, when using the callWithSyncFee SDK method.  Gelato Relay's Context contracts give you helper functions which you can use via inheritance in your target contract allowing you to decode information from the relay calldata, giving you access to:
+
+- `uint256 _getFee()`: a value denoting how much fee to pay.
+- `address _getFeeToken()`: the address of the token the fee is paid in.
+- `address _getFeeCollector()`: the address to which to send your payment.
+
+:::note
+If you need target function needs to know all three variables from the relay calldata, see GelatoRelayContext. 
+
+If you only need the feeCollector address (i.e. you already encode the fee and feeToken inside your own function parameters), see GelatoRelayFeeCollector.
+:::
+
+## Getting Started
+
+### Installing relay-context 
+relay-context is an extremely simple way to create a Gelato Relay compatible smart contract, with just one import.
+
+```bash
+npm install --save-dev @gelatonetwork/relay-context
+```
+
+or
+
+```bash
+yarn add -D @gelatonetwork/relay-context
+```
+
+:::note
+Please make sure to use version v3.0.0 and above.
+:::
+
+### Smart Contract
+
+```solidity
+import {
+    GelatoRelayContext 
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
+```
+
+for GelatoRelayContext.
+
+OR:
+
+```solidity
+import {
+    GelatoRelayFeeCollector
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayFeeCollector.sol";
+```
+
+for GelatoRelayFeeCollector.
+
+## GelatoRelayContext
+
+GelatoRelayContext allows your smart contract to retrieve the following information from the relay calldata:
+
+- Gelato's fee collector address, a contract specifically deployed for collecting relay fees securely. This allows a smart contract to transfer fees directly if you are using the syncFee payment method.
+- The fee token address specifying which address the fee will be paid in, which Gelato resolved from the original relay-SDK request body.
+- The fee itself, which includes the gas cost + Gelato's fee on top.
+
+Below is an example:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
+
+import {
+    GelatoRelayContext
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
+
+// Inheriting GelatoRelayContext gives access to:
+// 1. onlyGelatoRelay modifier
+// 2. payment methods, i.e. _transferRelayFee
+// 3. _getFeeCollector(), _getFeeToken(), _getFee()
+contract Counter is GelatoRelayContext {
+    uint256 public counter;
+    
+    event IncrementCounter();
+    
+    // `increment` is the target function to call
+    // this function increments a counter variable after payment to Gelato
+    function increment() external onlyGelatoRelay {
+        // Remember to autheticate your call since you are not using ERC-2771
+        // _yourAuthenticationLogic()
+            
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        _transferRelayFee();
+
+        counter++;
+
+        emit IncrementCounter();
+    }
+}
+```
+
+Line 12 inherits the GelatoRelayContext contract, giving access to these features:
+
+### Verifying the caller:
+
+- `onlyGelatoRelay`: a modifier which will only allow Gelato Relay to call this function.
+- `_isGelatoRelay(address _forwarder)`: a function which returns true if the address matches Gelato Relay's address.
+
+### Decoding the calldata:
+- `_getFeeCollector()` : a function to retrieve the fee collector address.
+- `_getFee()`: a function to retrieve the fee that Gelato will charge. 
+- `_getFeeToken()`: a function to retrieve the address of the token used for fee payment.
+
+### Transferring Fees to Gelato
+As you are using the callWithSyncFee SDK method, you can use the below helper functions to pay directly to Gelato:
+
+- `_transferRelayFee()`: a function which transfers the fee amount to Gelato, with no cap. 
+- `_transferRelayFeeCapped(uint256 _maxFee)`: a function which transfers the fee amount to Gelato which a set cap from the argument maxFee in wei. This helps limit fees on function calls in case of gas volatility or just for general budgeting.
+
+## GelatoRelayFeeCollector
+
+### Why are there two different contracts that I can inherit? 
+You can choose to inherit either GelatoRelayContext or GelatoRelayFeeCollector. GelatoRelayContext gives you access to all three pieces of information: feeCollector, feeToken, and fee, whereas GelatoRelayFeeCollector assumes only the feeCollector address is appended to the calldata.
+
+### Which contract should I inherit?
+In the majority of scenarios, inheriting from GelatoRelayContext is recommended. This approach provides the most convenient way to handle fees, as it only requires you to call either the _transferRelayFee() or _transferRelayFeeCapped(uint256 _maxFee) method. All other processes are managed seamlessly behind the scenes.
+
+If the fee is known in advance - for instance, if you have already queried our fee oracle for the fee amount and a user has given their approval on this amount and the token to be used for payment via a front-end interface - you would only need to inform your smart contract where to direct this fee. In this case, you would require only the feeCollector address. For this purpose, please inherit from GelatoRelayFeeCollector. Refer to the following details.
+
+### Recommendation: maximum fee signing
+The fee oracle allows you to query and display a fee to your users before sending their transaction via Gelato Relay. Therefore, you could also give them the option to sign off on a certain fee. In this case, you might want to pass the fee you receive from the oracle directly to your target function as an argument.
+
+This makes sense, but be wary that due to gas price volatility, a smoother UX might be to query the fee oracle and calculate a maximum fee by adding some overhead, and displaying this maximum fee to the user. This way, if gas prices do fluctuate more than normal, you can be certain that your user's transaction is executed. You can choose to set a very large overhead, or a smaller one, depending on your own trade-off between execution likelihood and cost to the user. This way, you can also integrate a fee check from inside target function to avoid any overpayments. 
+
+### GelatoRelayFeeCollector Integration
+GelatoRelayFeeCollector allows your smart contract to retrieve the following information from the relay calldata:
+
+- Gelato's fee collector address, a contract specifically deployed for collecting relay fees securely. This allows a smart contract to transfer fees directly if you are using the syncFee payment method.
+
+Below is an example:
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {
+    SafeERC20
+} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {
+    GelatoRelayFeeCollector
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayFeeCollector.sol";
+
+contract Counter is GelatoRelayFeeCollector {
+    using SafeERC20 for IERC20;
+    uint256 public counter;
+    
+    event IncrementCounter();
+    
+    // `increment` is the target function to call
+    // this function increments a counter variable after payment to Gelato
+    function increment() external onlyGelatoRelay {
+        // Remember to autheticate your call since you are not using ERC-2771
+        // _yourAuthenticationLogic()
+
+        // Retreiving the feeCollector address, using the nativeToken
+        address feeCollector = _getFeeCollector();
+        address nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; 
+        // Hardcoding the fee to 100 wei - NOTE: this is just for example
+        // If you do not pay enough to feeCollector, 
+        // your relay request will not go through
+        // In reality, you should pass in user signatures TODO
+        uint256 fee = 100;
+        
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        transfer(nativeToken, feeCollector, fee);
+
+        counter++;
+
+        emit IncrementCounter();
+    }
+    
+    
+    function transfer(
+        address _token,
+        address _to,
+        uint256 _amount
+    ) internal {
+        if (_amount == 0) return;
+        _token == NATIVE_TOKEN
+            ? Address.sendValue(payable(_to), _amount)
+            : IERC20(_token).safeTransfer(_to, _amount);
+    }
+}
+```
+
+Line 13 inherits the GelatoRelayFeeCollector contract, giving access to these features:
+
+### Verifying the caller:
+
+- `onlyGelatoRelay`: a modifier which will only allow Gelato Relay to call this function.
+- `_isGelatoRelay(address _forwarder)`: a function which returns true if the address matches Gelato Relay's address.
+
+### Decoding the calldata:
+- `_getFeeCollector()`: a function to retrieve the fee collector address.
