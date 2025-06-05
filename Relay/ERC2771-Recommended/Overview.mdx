@@ -2,4 +2,182 @@
 title: Overview
 ---
 
-TODO!!!
+# ERC-2771 (Recommended)
+
+Native meta transactions with top notch security.
+
+:::warning
+If you plan to use ERC-2771 with a multicall method or any other method using delegateCall(), please read carefully the section [Avoid ERC-2771-risks](/Relay/ERC2771-Recommended/Avoid-ERC2771-risks).
+:::
+
+:::note
+If you are using `@gelatonetwork/relay-sdk` v3 or contracts from the package `@gelatonetwork/relay-context` v2, please follow this [migration guide](/Relay/ERC2771-Recommended/Migration-Guide) to migrate to the new versions.
+:::
+
+After reading this page:
+
+- You'll understand the difference between `sponsoredCallERC2771` and `callWithSyncFeeERC2771`
+- You'll understand how to use `sponsoredCallERC2771` and `callWithSyncFeeERC2771` in combination with ERC2771Context to achieve a gasless UX for your app, with secure user signature verification
+- You'll understand ERC-2771's core functionality and how it allows for the off-chain sender address to be verified on-chain
+
+## Recommendation for using ERC-2771
+
+As detailed in the Security Considerations section, it's crucial to ensure that your relay implementation is impervious to vulnerabilities when using a relayer. The most secure approach is to utilize our ERC-2771 implementations:
+
+- `sponsoredCallERC2771`
+- `callWithSyncFeeERC2771`
+
+When using `sponsoredCallERC2771`, you sponsor your user's gas fees, leveraging 1Balance for payment. In contrast, with `callWithSyncFeeERC2771`, the fees are paid from the target contract.
+
+In both instances, users are prompted to sign their transaction's relay request using their private keys (for instance, through MetaMask). This step is crucial for security purposes. Gelato verifies on-chain that the user's signature corresponds with the required address before forwarding the call.
+
+When relaying a message to a target smart contract function, it's essential for the function to authenticate the message's origin and confirm it was forwarded through the correct relayer. Without these verifications, your target function becomes susceptible to exploitation. ERC-2771 employs sophisticated data encoding to relay the original `_msgSender` from off-chain, and it guarantees that only the `trustedForwarder` is capable of encoding this value. These two parameters, in tandem, safeguard against any potential misconduct, ensuring a secure transmission of information from off-chain to on-chain!
+
+## Why is this important?
+
+In the context of relaying, `msg.sender` loses its usual informational significance. Under normal circumstances, `msg.sender` would denote the user initiating the transaction; however, with off-chain relaying, we lose this valuable piece of information.
+
+Consider this scenario: how does a target smart contract determine who can call a particular function? In this case, `msg.sender` will be the relayer, but merely whitelisting this address is insufficient and still permits others using the same relayer to call your function. This situation can raise significant concerns, particularly when low-level calls are involved.
+
+The optimal solution would be to allow the initiator of the relay call to specify an address and relay this address on-chain. The target smart contract can then authenticate a function call using this address.
+
+The challenge then becomes: how can we successfully transmit information (a specific address) via low-level calldata from off-chain to on-chain without disrupting the calldata's integrity?
+
+## Core Functionality of ERC-2771
+
+Here's where the real magic unfolds. The `trustedForwarder` encodes the `from` address (i.e., the off-chain address) into the calldata by appending it at the end:
+
+```solidity
+(bool success, ) = to.call.value(value)(abi.encodePacked(data, from));
+```
+
+Now, the target contract can validate the `from` address by decoding the data in the same manner, ensuring that this message has been passed through the `trustedForwarder`.
+
+The necessary target contract function can then confidently confirm that the correct entity signed and requested this payload to be relayed, and only via a trusted forwarder - in our case, the Gelato Relay.
+
+## How does Gelato encode this data?
+
+Let's take as an example relay method `sponsoredCallERC2771`. Method `callWithSyncFeeERC2771` works similarly.
+
+Gelato Relay's `sponsoredCallERC2771` function encodes the user's address, which can then be utilized by the ERC-2771 compatible target smart contract. The most relevant part, where the user address is appended to the calldata, is shown below:
+
+```solidity
+// GelatoRelay1BalanceERC2771.sol
+_call.target.revertingContractCall(
+    _encodeERC2771Context(_call.data, _call.user),
+    "GelatoRelay1BalanceERC2771.sponsoredCallERC2771:"
+);
+```
+
+where `_encodeERC2771Context` refers to:
+
+```solidity
+// GelatoRelayUtils.sol
+function _encodeERC2771Context(bytes calldata _data, address _msgSender)
+    pure
+    returns (bytes memory)
+{
+    return abi.encodePacked(_data, _msgSender);
+}
+```
+
+We are encoding the calldata and the user address together by simply appending the user's address to the end as required by ERC-2771.
+
+## How can I modify my smart contract to be ERC-2771 compatible?
+
+Let's take a look at an example using relay method `sponsoredCallERC2771`. For `callWithSyncFeeERC2771` please refer to the steps described [here](/Relay/How-To-Guides/Allow-your-users-to-pay-with-ERC20).
+
+### 1. Install Gelato's relay-context package in your contract repo
+
+```bash
+npm install --save-dev @gelatonetwork/relay-context
+```
+
+or
+
+```bash
+yarn add -D @gelatonetwork/relay-context
+```
+
+### 2. Import the ERC2771Context contract:
+
+```solidity
+import {
+    ERC2771Context
+} from "@gelatonetwork/relay-context/contracts/vendor/ERC2771Context.sol";
+```
+
+This contract's main functionality (originally implemented by OpenZeppelin) is to decode the off-chain msg.sender from the encoded calldata using `_msgSender()`.
+
+```solidity
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts (last updated v4.7.0) (metatx/ERC2771Context.sol)
+
+pragma solidity ^0.8.9;
+
+import "../utils/Context.sol";
+
+/**
+ * @dev Context variant with ERC2771 support.
+ */
+abstract contract ERC2771Context is Context {
+    address private immutable _trustedForwarder;
+    
+    constructor(address trustedForwarder) {
+        _trustedForwarder = trustedForwarder;
+    }
+
+    function isTrustedForwarder(address forwarder) public view virtual returns (bool) {
+        return forwarder == _trustedForwarder;
+    }
+
+    function _msgSender() internal view virtual override returns (address sender) {
+        if (isTrustedForwarder(msg.sender)) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            /// @solidity memory-safe-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return super._msgSender();
+        }
+    }
+
+    function _msgData() internal view virtual override returns (bytes calldata) {
+        if (isTrustedForwarder(msg.sender)) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return super._msgData();
+        }
+    }
+}
+```
+
+The `trustedForwarder` variable is set in the constructor which allows for setting a trusted party that will relay your message to your target smart contract. In our case, this is `GelatoRelay1BalanceERC2771.sol` which you can find in the contract addresses section.
+
+The `_msgSender()` function encapsulates the main functionality of ERC-2771, by decoding the user address from the last 20 bytes of the calldata. 
+
+In Solidity, the logic is equivalent to:
+
+```solidity
+abi.decode(
+    msg.data[msg.data.length - 20:],
+    (address)
+);
+```
+
+Gelato's smart contracts handle the encoding of important information to the calldata (see How does Gelato encode this data?). It is the job of your target smart contract function to decode this information using this `_msgSender()` function. 
+
+The function `_msgData()` removes the msg.sender from the entire calldata if the contract was called by the trustedForwarder, or otherwise falls back to return the original calldata.
+
+### 3. Replace msg.sender with _msgSender()
+
+Within the function that you would like to be called with Gelato Relay, replace all instances of `msg.sender` with a call to the `_msgSender()` function inherited from ERC2771Context. `_msgSender()` is the off-chain signer of the relay request, allowing for secure whitelisting on your target function. 
+
+### 4. (Re)deploy your contract and whitelist GelatoRelay1BalanceERC2771
+
+If your contract is not upgradeable, then you will have to redeploy your contract to set `GelatoRelay1BalanceERC2771.sol` as your trustedForwarder:
+
+`GelatoRelay1BalanceERC2771.sol` is immutable for security reasons. This means that once you set `GelatoRelay1BalanceERC2771.sol` as your trusted forwarder, there is no way for Gelato to change the ERC2771 signature verification scheme and so you can be sure that the intended `_msgSender` is correct and accessible from within your target contract.
+
+Please refer to the contract addresses section to find out which Gelato relay address to use as a trustedForwarder. Use `GelatoRelay1BalanceERC2771.sol` address for `sponsoredCallERC2771`.

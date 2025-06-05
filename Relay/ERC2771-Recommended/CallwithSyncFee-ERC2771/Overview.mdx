@@ -3,4 +3,462 @@ title: "Overview"
 description: "Learn how to use CallwithSyncFee ERC-2771"
 ---
 
-TODO!!!
+# CallWithSyncFeeERC2771
+
+Transactions with on-chain payments and ERC2771 authentication support.
+
+:::warning
+If you plan to use ERC-2771 with a multicall method or any other method using delegateCall(), please read carefully the section [Avoid ERC-2771-risks](/Relay/ERC2771-Recommended/Avoid-ERC2771-risks).
+:::
+
+:::note
+If you are using `@gelatonetwork/relay-sdk` v3 or contracts from the package `@gelatonetwork/relay-context` v2, please follow this [migration guide](/Relay/ERC2771-Recommended/Migration-Guide) to migrate to the new versions.
+:::
+
+After reading this page:
+
+- You'll know how to use the `callWithSyncFeeERC2771` SDK method, using the syncFee payment method
+- You'll see some code which will help you send a relay request within minutes
+- You'll learn how to pay for transactions using the provided values for fee, feeToken and feeCollector
+
+:::important
+Please proceed to our Security Considerations page and read it thoroughly before advancing with your implementation. It is crucial to understand all potential security risks and measures to mitigate them.
+:::
+
+## Overview
+
+The `callWithSyncFeeERC2771` method uses the syncFee payment method with ERC-2771 support.
+
+## Paying for Transactions
+
+When using `callWithSyncFeeERC2771` relay method, the target contract assumes responsibility for transferring the fee to Gelato's fee collector during transaction execution. For this, the target contract needs to know:
+
+- fee: the transfer amount
+- feeToken: the token to be transferred
+- feeCollector: the destination address for the fee
+
+Fortunately, Gelato provides some useful tools within the Relay Context Contracts:
+
+1. By inheriting the `GelatoRelayContextERC2771` contract in your target contract, you have the ability to transfer the fee through one of two straightforward methods: `_transferRelayFee()` or `_transferRelayFeeCapped(uint256 maxFee)`. In either case, the inherited contract takes care of decoding the fee, feeToken, and feeCollector behind the scenes.
+
+2. The Gelato Relay backend simplifies the process by automatically calculating the fee for you, using Gelato's Fee Oracle to perform the calculations in the background.
+
+Alternatively, you may choose to inherit the `GelatoRelayFeeCollectorERC2771` contract. With this approach, Gelato decodes only the feeCollector. You must provide the fee and feeToken on-chain, either by hardcoding them (which is not recommended) or embedding them within the payload to be executed. The suggested way to handle this is to calculate the fee with Gelato's Fee Oracle.
+
+This modular design ensures a smooth integration with Gelato's fee handling mechanisms, providing a flexible and user-friendly approach to managing transaction fees within your dApps.
+
+## Setting maxFee for Your Transaction
+
+Setting a maximum fee, or maxFee, for your transactions is strongly advised. This practice enables you to ensure that transaction costs remain below a specific limit. The method `_transferRelayFeeCapped(uint256 maxFee)` in the `GelatoRelayContextERC2771` contract provides a convenient way to set the maxFee easily.
+
+If you are utilizing the `GelatoRelayFeeCollectorERC2771` contract, the recommended way to pass the maxFee is by calculating the fee with Gelato's Fee Oracle, which is accessible in the Relay SDK. The `getEstimatedFee()` method is provided to facilitate this calculation.
+
+## SDK Methods
+
+### callWithSyncFeeERC2771
+
+This method initiates the signing of ERC2771 requests with the provided BrowserProvider or Wallet. Once the signature is obtained, the request is forwarded to Gelato.
+
+```typescript
+const callWithSyncFeeERC2771 = async (
+  request: CallWithSyncFeeERC2771Request | CallWithSyncFeeConcurrentERC2771Request,
+  signerOrProvider: ethers.BrowserProvider | ethers.Signer,
+  options?: RelayRequestOptions,
+  apiKey?: string
+): Promise<RelayResponse>
+```
+
+#### Arguments
+
+- `request`: The body of the request intended for sending
+- `signerOrProvider`: a valid provider connected to RPC or a signer
+- `options`: an object for specifying optional parameters
+- `apiKey`: an optional API key that links your request to your Gelato Relay account. As this call pertains to the syncFee payment method, transaction costs won't be deducted from your 1Balance account. By using the API key, you can benefit from increased rate limits of your Gelato Relay account
+
+#### Response
+
+```typescript
+type RelayResponse = {
+  taskId: string;
+};
+```
+
+- `taskId`: a unique task ID which can be used for tracking your request
+
+### getSignatureDataERC2771
+
+This method starts the signing process for ERC2771 requests using the given BrowserProvider or Signer. After capturing the signature, it returns both the signature and the message. This collected data can then be used with the `callWithSyncFeeERC2771WithSignature` method to send the request to Gelato.
+
+```typescript
+getSignatureDataERC2771 = (
+  request: CallWithERC2771Request | CallWithConcurrentERC2771Request,
+  signerOrProvider: ethers.BrowserProvider | ethers.Signer,
+  type: ERC2771Type
+): Promise<SignatureData>
+```
+
+#### Arguments
+
+- `request`: The body of the request intended for sending
+- `signerOrProvider`: a valid provider connected to RPC or a signer
+- `type`: CallWithSyncFee for a sequential flow or ConcurrentCallWithSyncFee for a concurrent flow
+
+#### Response
+
+```typescript
+type SignatureData = ConcurrentSignatureData | SequentialSignatureData;
+
+type ConcurrentSignatureData = {
+  struct: CallWithConcurrentERC2771Struct;
+  signature: string;
+};
+
+type SequentialSignatureData = {
+  struct: CallWithERC2771Struct;
+  signature: string;
+};
+```
+
+- `struct`: EIP-712 message data
+- `signature`: EIP-712 signature
+
+### getDataToSignERC2771
+
+This method provides the message data intended for external signing along with the EIP-712 typed data. After obtaining the signature, the request can be dispatched using the `callWithSyncFeeERC2771WithSignature` method.
+
+```typescript
+getDataToSignERC2771 = (
+  request: CallWithERC2771Request | CallWithConcurrentERC2771Request,
+  type: ERC2771Type,
+  signerOrProvider?: ethers.BrowserProvider | ethers.Signer,
+): Promise<PayloadToSign>
+```
+
+#### Arguments
+
+- `request`: The body of the request intended for sending
+- `type`: CallWithSyncFee for a sequential flow or ConcurrentCallWithSyncFee for a concurrent flow
+- `signerOrProvider` (optional): A provider needed in a sequential flow to obtain the nonce from the smart contract. If you're providing the nonce within your request or if you're using the concurrent flow, this parameter isn't necessary
+
+#### Response
+
+```typescript
+type PayloadToSign = ConcurrentPayloadToSign | SequentialPayloadToSign;
+
+type ConcurrentPayloadToSign = {
+  struct: CallWithConcurrentERC2771Struct;
+  typedData: CallWithSyncFeeConcurrentERC2771PayloadToSign;
+};
+
+type SequentialPayloadToSign = {
+  struct: CallWithERC2771Struct;
+  typedData: CallWithSyncFeeERC2771PayloadToSign;
+};
+```
+
+- `struct`: EIP-712 message data
+- `typedData`: EIP-712 typed data
+
+### callWithSyncFeeERC2771WithSignature
+
+This method sends pre-signed requests to Gelato.
+
+```typescript
+const callWithSyncFeeERC2771WithSignature = async (
+    struct: CallWithERC2771Struct | CallWithConcurrentERC2771Struct;
+    syncFeeParams: BaseCallWithSyncFeeParams;
+    signature: string;
+    options?: RelayRequestOptions;
+    apiKey?: string
+): Promise<RelayResponse>
+```
+
+#### Arguments
+
+- `struct`: EIP-712 message data returned from the signing methods
+- `syncFeeParams`: the feetoken and isRelayContext params
+- `signature`: EIP-712 signature returned after signing the request
+- `options`: an object for specifying optional parameters
+- `apiKey`: an optional API key that links your request to your Gelato Relay account. As this call pertains to the syncFee payment method, transaction costs won't be deducted from your 1Balance account. By using the API key, you can benefit from increased rate limits of your Gelato Relay account
+
+#### Response
+
+```typescript
+type RelayResponse = {
+  taskId: string;
+};
+```
+
+- `taskId`: a unique task ID which can be used for tracking your request
+
+### Optional Parameters
+
+```typescript
+type RelayRequestOptions = {
+  gasLimit?: BigNumberish;
+  retries?: number;
+};
+```
+
+- `gasLimit`: the gas limit of the relay call. This effectively sets an upper price limit for the relay call.
+
+  If you are using your own custom gas limit, please add a 150k gas buffer on top of the expected gas usage for the transaction. This is for the Gelato Relay execution overhead, and adding this buffer reduces your chance of the task cancelling before it is executed on-chain.
+
+  If your contract has any hardcoded requirements about gas usage, please always explicitly pass the gasLimit to the SDK/API, as Gelato will not know what hardcoded gas expectations your contract has. Otherwise, your relay requests might not be executable.
+
+- `retries`: the number of retries that Gelato should attempt before discarding this relay call. This can be useful if the state of the target contract is not fully known and such reverts can not be definitively avoided.
+
+## Sending a Request
+
+As of today, we support two distinct ways of sending `callWithSyncFeeERC2771` requests:
+
+1. **Sequentially**: This approach ensures that each request is ordered and validated against the nonce stored on-chain. You have two options in this method:
+   - Fetch the current nonce value from the smart contract yourself and include it with your request
+   - Allow the relay-sdk to fetch the nonce value for you when handling your relay request
+
+2. **Concurrently**: This method enables you to send multiple transactions simultaneously. Replay protection is achieved using a hash-based salt mechanism. Again, you have two options:
+   - Provide your own salt value
+   - Allow the relay-sdk to generate a unique salt value for you when processing your relay request
+
+By default `callWithSyncFeeERC2771` requests are using the sequential method.
+
+:::note
+Concurrent ERC2771 support has been introduced in the relay-sdk version 5.1.0. Please make sure that your package is up-to-date to start using it.
+:::
+
+### Request Body
+
+```typescript
+type SequentialERC2771Request = {
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+  user: string;
+  userDeadline?: BigNumberish;
+  feeToken: string;
+  isRelayContext?: boolean;
+  isConcurrent?: false;
+  userNonce?: BigNumberish;
+};
+
+type ConcurrentERC2771Request = {
+  chainId: BigNumberish;
+  target: string;
+  data: BytesLike;
+  user: string;
+  userDeadline?: BigNumberish;
+  feeToken: string;
+  isRelayContext?: boolean;
+  isConcurrent: true;
+  userSalt?: string;
+};
+```
+
+#### Common Parameters
+
+- `chainId`: the chain ID of the chain where the target smart contract is deployed
+- `target`: the address of the target smart contract
+- `data`: encoded payload data (usually a function selector plus the required arguments) used to call the required target address
+- `user`: the address of the user's EOA
+- `userDeadline`: optional, the amount of time in seconds that a user is willing for the relay call to be active in the relay backend before it is dismissed
+
+  This way the user knows that if the transaction is not sent within a certain timeframe, it will expire. Without this, an adversary could pick up the transaction in the mempool and send it later. This could transfer money, or change state at a point in time which would be highly undesirable to the user.
+
+- `feeToken`: the address of the token that is to be used for payment. Please visit [SyncFee Payment Tokens](/Relay/How-To-Guides/SyncFee-Payment-Tokens) for the full list of supported payment tokens per network
+- `isRelayContext`: an optional boolean (default: true) denoting what data you would prefer appended to the end of the calldata
+
+  If set to true (default), Gelato Relay will append the feeCollector address, the feeToken address, and the uint256 fee to the calldata. In this case your target contract should inherit from the `GelatoRelayContextERC2771` contract.
+
+  If set to false, Gelato Relay will only append the feeCollector address to the calldata. In this case your target contract should inherit from the `GelatoRelayFeeCollectorERC2771` contract.
+
+#### Parameters For Sequential Requests
+
+- `isConcurrent`: false (default), optional, represents that the users' requests are validated based on a nonce, which enforces them to be processed sequentially
+- `userNonce`: optional, this nonce, akin to Ethereum nonces, is stored in a local mapping on the relay contracts. It serves to enforce the nonce ordering of relay calls if the user requires sequential processing. If this parameter is omitted, the relay-sdk will automatically query the current value on-chain
+
+#### Parameters For Concurrent Requests
+
+- `isConcurrent`: true, indicates that the users' requests are validated based on a unique salt, allowing them to be processed concurrently. Replay protection is still ensured by permitting each salt value to be used only once
+- `userSalt`: optional, this is a bytes32 hash that is used for replay protection. If the salt is not provided then relay-sdk would generate a unique value based on a random seed and a timestamp
+
+## Example Code (using GelatoRelayContextERC2771)
+
+### 1. Deploy a GelatoRelayContextERC2771 compatible contract
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
+
+import {
+    GelatoRelayContextERC2771
+} from "@gelatonetwork/relay-context/contracts/GelatoRelayContextERC2771.sol";
+
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+
+// Inheriting GelatoRelayContext gives access to:
+// 1. _getFeeCollector(): returns the address of Gelato's feeCollector
+// 2. _getFeeToken(): returns the address of the fee token
+// 3. _getFee(): returns the fee to pay
+// 4. _transferRelayFee(): transfers the required fee to Gelato's feeCollector.abi
+// 5. _transferRelayFeeCapped(uint256 maxFee): transfers the fee to Gelato
+//    only if fee < maxFee
+// 6. function _getMsgSender(): decodes and returns the user's address from the
+//    calldata, which can be used to refer to user safely instead of msg.sender
+//    (which is Gelato Relay in this case).
+// 7. _getMsgData(): returns the original msg.data without appended information
+// 8. onlyGelatoRelay modifier: allows only Gelato Relay's smart contract
+//    to call the function
+contract CounterRelayContextERC2771 is GelatoRelayContextERC2771 {
+    using Address for address payable;
+
+    mapping(address => uint256) public contextCounter;
+
+    // emitting an event for testing purposes
+    event IncrementCounter(address msgSender);
+
+    // `increment` is the target function to call.
+    // This function increments a counter variable which is 
+    // mapped to every _getMsgSender(), the address of the user.
+    // This way each user off-chain has their own counter 
+    // variable on-chain.
+    function increment() external onlyGelatoRelayERC2771 {
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        _transferRelayFee();
+
+        // Incrementing the counter mapped to the _getMsgSender()
+        contextCounter[_getMsgSender()]++;
+        
+        emit IncrementCounter(_getMsgSender());
+    }
+    
+    // `incrementFeeCapped` is the target function to call.
+    // This function uses `_transferRelayFeeCapped` method to ensure 
+    // better control of gas fees. If gas fees are above the maxFee value 
+    // the transaction will not be executed.
+    // The maxFee will be passed as an argument to the contract call.
+    // This function increments a counter variable by 1
+    // IMPORTANT: with `callWithSyncFee` you need to implement 
+    // your own smart contract security measures, as this 
+    // function can be called by any third party and not only by 
+    // Gelato Relay. If not done properly, funds kept in this
+    // smart contract can be stolen.
+    function incrementFeeCapped(uint256 maxFee) external onlyGelatoRelayERC2771 {
+        // Payment to Gelato
+        // NOTE: be very careful here!
+        // if you do not use the onlyGelatoRelay modifier,
+        // anyone could encode themselves as the fee collector
+        // in the low-level data and drain tokens from this contract.
+        _transferRelayFeeCapped(maxFee);
+
+        // Incrementing the counter mapped to the _getMsgSender()
+        contextCounter[_getMsgSender()]++;
+
+        emit IncrementCounter(_getMsgSender());
+    }
+}
+```
+
+### 2. Import GelatoRelaySDK into your front-end .js project
+
+```javascript
+import { GelatoRelay, CallWithSyncFeeERC2771Request } from "@gelatonetwork/relay-sdk";
+```
+
+Once we have imported the GelatoRelay class, when using ERC2771 methods, we must initialize it with the appropriate trustedForwarder. The possible configurations are:
+
+```javascript
+contract: {
+    relay1BalanceERC2771: "trustedForwarder for method sponsoredCallERC2771",
+    relayERC2771: "trustedForwarder for method callWithSyncFeeERC2771",
+    relay1BalanceConcurrentERC2771: "trustedForwarder for method concurrent sponsoredCallERC2771",
+    relayConcurrentERC2771: "trustedForwarder for method concurrent callWithSyncFeeERC2771",
+    relay1BalanceConcurrentERC2771zkSync: "trustedForwarder for method concurrent sponsoredCallERC2771 on zkSync",
+    relay1BalanceERC2771zkSync: "trustedForwarder for method sponsoredCallERC2771 on zkSync",
+    relayConcurrentERC2771zkSync: "trustedForwarder for method concurrent callWithSyncFeeERC2771 on zkSync",
+    relayERC2771zkSync: "trustedForwarder for method callWithSyncFeeERC2771 on zkSync",
+}
+```
+
+We will need to go to the Supported Networks and check the network and the contract addresses to identify the trustedForwarder associated with our method.
+
+In the example below, we are using the method `callWithSyncFeeERC2771` on Sepolia, the trustedForwarder associated is `0xb539068872230f20456CF38EC52EF2f91AF4AE49`. We will initialize GelatoRelay with the following config:
+
+```javascript
+const relay = new GelatoRelay({
+    contract: {
+        relayERC2771: "0xb539068872230f20456CF38EC52EF2f91AF4AE49"
+    }
+});
+```
+
+### 3. Send the payload to Gelato
+
+```javascript
+// target contract address
+const counter = "<your counter contract address>";
+
+// using a human-readable ABI for generating the payload
+const abi = ["function increment()"];
+
+// address of the token used to pay fees
+const feeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+
+// connect to the blockchain via a front-end provider
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = await provider.getSigner();
+const user = await signer.getAddress();
+
+// instantiate the target contract object
+const contract = new ethers.Contract(counter, abi, signer);
+
+// example calling the increment() method
+const { data } = await contract.increment.populateTransaction();
+
+// populate the relay SDK request body
+const request: CallWithSyncFeeERC2771Request = {
+    chainId: (await provider.getNetwork()).chainId,
+    target: counter,
+    data: data,
+    user: user,
+    feeToken: feeToken,
+    isRelayContext: true,
+};
+
+// send relayRequest to Gelato Relay API
+const relayResponse = await relay.callWithSyncFeeERC2771(request, provider);
+
+// -----------------------------------------------------------------
+// the following is an alternative example using Gelato Fee Oracle, 
+// setting maxFee, and calling the incrementFeeCapped(maxFee) method
+
+// retrieve the estimate fee from Gelato Fee Oracle
+const fee = await relay.getEstimatedFee(
+    (await provider.getNetwork()).chainId,
+    feeToken,
+    gasLimit,
+    false,
+);
+
+// you can use 2x or 3x to set your maxFee
+const maxFee = fee * 2;
+
+// example calling the incrementFeeCapped(maxFee) method
+const { dataMaxFee } = await contract.incrementFeeCapped.populateTransaction(maxFee);
+
+// populate the relay SDK request body
+const requestMaxFee: CallWithSyncFeeERC2771Request = {
+    chainId: (await provider.getNetwork()).chainId,
+    target: counter,
+    data: dataMaxFee,
+    user: user,
+    feeToken: feeToken,
+    isRelayContext: true,
+};
+
+// send relayRequest to Gelato Relay API
+const relayResponseMaxFee = await relay.callWithSyncFeeERC2771(requestMaxFee, provider);
+```
